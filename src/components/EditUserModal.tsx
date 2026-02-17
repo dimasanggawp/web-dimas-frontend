@@ -9,14 +9,25 @@ interface Role {
     name: string;
 }
 
+interface ClassRoom {
+    id: number;
+    name: string;
+}
+
+interface TahunAjaran {
+    id: number;
+    tahun: string;
+    is_active: boolean;
+}
+
 interface UserData {
     id: number;
     name: string;
     email: string;
     role: Role;
     role_id: number;
-    class_room_id?: number | null;
-    tahun_ajaran_id?: number | null;
+    class_room?: ClassRoom;
+    tahun_ajaran?: TahunAjaran;
 }
 
 interface EditUserModalProps {
@@ -24,57 +35,29 @@ interface EditUserModalProps {
     onClose: () => void;
     onSuccess: () => void;
     user: UserData | null;
+    classes: any[];
+    academicYears: any[];
 }
 
-export default function EditUserModal({ isOpen, onClose, onSuccess, user }: EditUserModalProps) {
+export default function EditUserModal({ isOpen, onClose, onSuccess, user, classes, academicYears }: EditUserModalProps) {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [roleId, setRoleId] = useState("2"); // Default to User
     const [classId, setClassId] = useState("");
     const [academicYearId, setAcademicYearId] = useState("");
-    const [classes, setClasses] = useState<any[]>([]);
-    const [academicYears, setAcademicYears] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
-
-    const fetchClasses = async () => {
-        try {
-            const { token } = getAuth();
-            const res = await fetch("http://127.0.0.1:8000/api/class-rooms", {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
-            if (res.ok) setClasses(await res.json());
-        } catch (err) {
-            console.error("Failed to fetch classes", err);
-        }
-    };
-
-    const fetchAcademicYears = async () => {
-        try {
-            const { token } = getAuth();
-            const res = await fetch("http://127.0.0.1:8000/api/tahun-ajaran", {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
-            if (res.ok) setAcademicYears(await res.json());
-        } catch (err) {
-            console.error("Failed to fetch academic years", err);
-        }
-    };
 
     useEffect(() => {
         if (user) {
             setName(user.name);
             setEmail(user.email);
             setRoleId(user.role_id.toString());
-            setClassId(user.class_room_id?.toString() || "");
-            setAcademicYearId(user.tahun_ajaran_id?.toString() || "");
+            setClassId(user.class_room?.id?.toString() || "");
+            setAcademicYearId(user.tahun_ajaran?.id?.toString() || "");
             setPassword(""); // Don't prefill password
             setError("");
-        }
-        if (isOpen) {
-            fetchClasses();
-            fetchAcademicYears();
         }
     }, [user, isOpen]);
 

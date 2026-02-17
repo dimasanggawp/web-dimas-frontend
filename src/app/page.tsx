@@ -1,65 +1,107 @@
-import Image from "next/image";
+"use client";
+
+// Force update
+import { useEffect, useState } from "react";
+import Navbar from "@/components/Navbar";
+import MateriCard from "@/components/MateriCard";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+
+interface Materi {
+  id: number;
+  title: string;
+  slug: string;
+  content: string;
+  image?: string;
+  created_at: string;
+  user: {
+    name: string;
+  };
+}
 
 export default function Home() {
+  const [materis, setMateris] = useState<Materi[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchMateri() {
+      try {
+        const res = await fetch('http://127.0.0.1:8000/api/materi');
+        if (res.ok) {
+          const data = await res.json();
+          setMateris(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch materi", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchMateri();
+  }, []);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="min-h-screen bg-slate-50">
+      <Navbar />
+
+      {/* Hero Section */}
+      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200">
+        <div className="max-w-7xl mx-auto text-center">
+          <h1 className="text-5xl font-extrabold text-slate-900 tracking-tight mb-6">
+            Portal Belajar <span className="text-primary">SMK TKJ</span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-xl text-slate-600 max-w-2xl mx-auto mb-10">
+            Temukan materi pembelajaran Teknik Komputer dan Jaringan terlengkap dan terupdate, disusun oleh pengajar profesional.
           </p>
+          <div className="flex justify-center gap-4">
+            <Link href="/materi" className="px-8 py-3 bg-primary text-white rounded-full font-medium hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/20">
+              Mulai Belajar
+            </Link>
+            <Link href="/profil" className="px-8 py-3 border border-slate-200 text-slate-600 bg-white rounded-full font-medium hover:border-primary hover:text-primary transition-colors">
+              Tentang Kami
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Latest Materials Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="flex justify-between items-end mb-10">
+          <div>
+            <h2 className="text-3xl font-bold text-slate-900 mb-2">Materi Terbaru</h2>
+            <p className="text-slate-600">Update wawasan teknologimu dengan artikel terbaru.</p>
+          </div>
+          <Link href="/materi" className="text-primary font-medium hover:text-blue-700 flex items-center gap-1 transition-colors">
+            Lihat Semua <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
-      </main>
+
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white rounded-xl shadow-sm border border-slate-100 p-4 h-96 animate-pulse">
+                <div className="h-48 bg-slate-200 rounded-lg mb-4"></div>
+                <div className="h-6 bg-slate-200 rounded w-3/4 mb-2"></div>
+                <div className="h-4 bg-slate-200 rounded w-1/2"></div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {materis.slice(0, 6).map((materi) => (
+              <MateriCard key={materi.id} materi={materi} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <footer className="bg-white border-t border-slate-200 py-12">
+        <div className="max-w-7xl mx-auto px-4 text-center text-slate-500">
+          <p>&copy; 2026 SMK TKJ. All rights reserved.</p>
+          <p className="mt-2 text-sm">Created by Dimas Angga Wahyu Putra</p>
+        </div>
+      </footer>
     </div>
   );
 }

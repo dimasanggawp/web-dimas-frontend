@@ -1,10 +1,38 @@
 @import "tailwindcss";
 
 :root {
+  /* Light mode (default) */
   --background: #ffffff;
-  --foreground: #1e293b; /* Slate 800 */
-  --primary: #3b82f6; /* Blue 500 */
+  --foreground: #1e293b;
+  --primary: #3b82f6;
   --primary-foreground: #ffffff;
+
+  /* Surface colors */
+  --surface: #ffffff;
+  --surface-secondary: #f8fafc;
+  --border: #e2e8f0;
+  --muted: #64748b;
+
+  /* Card / panel */
+  --card: #ffffff;
+  --card-border: #e2e8f0;
+}
+
+.dark {
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+  --primary: #60a5fa;
+  --primary-foreground: #0f172a;
+
+  /* Surface colors */
+  --surface: #1e293b;
+  --surface-secondary: #0f172a;
+  --border: #334155;
+  --muted: #94a3b8;
+
+  /* Card / panel */
+  --card: #1e293b;
+  --card-border: #334155;
 }
 
 @theme inline {
@@ -20,4 +48,57 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Dark mode overrides for common Tailwind classes */
+.dark .bg-white { background-color: var(--card) !important; }
+.dark .bg-slate-50 { background-color: #1e293b !important; }
+.dark .bg-slate-100 { background-color: #334155 !important; }
+.dark .bg-slate-200 { background-color: #475569 !important; }
+.dark .text-slate-900 { color: #f1f5f9 !important; }
+.dark .text-slate-800 { color: #e2e8f0 !important; }
+.dark .text-slate-700 { color: #cbd5e1 !important; }
+.dark .text-slate-600 { color: #94a3b8 !important; }
+.dark .text-slate-500 { color: #64748b !important; }
+.dark .border-slate-200 { border-color: #334155 !important; }
+.dark .border-slate-100 { border-color: #1e293b !important; }
+.dark .border-slate-300 { border-color: #475569 !important; }
+.dark .divide-slate-200 > * + * { border-color: #334155 !important; }
+.dark .shadow { box-shadow: 0 1px 3px rgba(0,0,0,0.4) !important; }
+.dark .shadow-sm { box-shadow: 0 1px 2px rgba(0,0,0,0.4) !important; }
+.dark .shadow-lg { box-shadow: 0 10px 15px rgba(0,0,0,0.5) !important; }
+.dark .shadow-xl { box-shadow: 0 20px 25px rgba(0,0,0,0.6) !important; }
+
+/* Input fields in dark mode */
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-color: #475569 !important;
+}
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748b !important;
+}
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+  border-color: #60a5fa !important;
+}
+
+/* Hover states */
+.dark .hover\:bg-slate-50:hover { background-color: #334155 !important; }
+.dark .hover\:bg-slate-100:hover { background-color: #475569 !important; }
+
+/* Navbar dark mode */
+.dark nav.navbar-glass {
+  background-color: rgba(15, 23, 42, 0.85) !important;
+  border-color: #334155 !important;
+}
+
+/* Modal dark mode */
+.dark .modal-overlay {
+  background-color: rgba(0, 0, 0, 0.7) !important;
 }

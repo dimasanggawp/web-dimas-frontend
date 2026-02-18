@@ -2,18 +2,17 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { BookOpen, Home, User, Menu, X, LogOut } from "lucide-react";
+import { BookOpen, Home, User, Menu, X, LogOut, Sun, Moon } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { getAuth, logout } from "@/utils/auth";
+import { useTheme } from "@/components/ThemeProvider";
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const pathname = usePathname();
-
-    // Check if user is logged in (client-side simple check for UI)
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const { theme, toggleTheme } = useTheme();
 
-    // Use effect to check login status only on client
     useEffect(() => {
         const { token } = getAuth();
         setIsLoggedIn(!!token);
@@ -21,8 +20,25 @@ export default function Navbar() {
 
     const closeMenu = () => setIsOpen(false);
 
+    const ThemeToggleButton = ({ className = "" }: { className?: string }) => (
+        <button
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+            className={`p-2 rounded-lg transition-colors ${theme === "dark"
+                    ? "bg-slate-700 text-yellow-400 hover:bg-slate-600"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                } ${className}`}
+        >
+            {theme === "dark" ? (
+                <Sun className="w-4 h-4" />
+            ) : (
+                <Moon className="w-4 h-4" />
+            )}
+        </button>
+    );
+
     return (
-        <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
+        <nav className="navbar-glass fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     <div className="flex-shrink-0 flex items-center">
@@ -54,7 +70,10 @@ export default function Navbar() {
                         )}
                     </div>
 
-                    <div className="hidden lg:flex items-center space-x-4">
+                    <div className="hidden lg:flex items-center space-x-3">
+                        {/* Theme Toggle */}
+                        <ThemeToggleButton />
+
                         {isLoggedIn ? (
                             <button onClick={() => {
                                 logout();
@@ -70,8 +89,9 @@ export default function Navbar() {
                         )}
                     </div>
 
-                    {/* Mobile menu button */}
-                    <div className="lg:hidden flex items-center">
+                    {/* Mobile: theme toggle + hamburger */}
+                    <div className="lg:hidden flex items-center gap-2">
+                        <ThemeToggleButton />
                         <button
                             onClick={() => setIsOpen(!isOpen)}
                             className="text-slate-600 hover:text-primary focus:outline-none p-2"

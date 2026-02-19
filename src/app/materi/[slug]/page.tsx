@@ -94,7 +94,7 @@ export default function DetailMateri() {
                         {materi.image && (
                             <div className="aspect-w-16 aspect-h-9 w-full h-[400px] relative overflow-hidden bg-slate-200">
                                 <img
-                                    src={materi.image}
+                                    src={materi.image.startsWith('http') ? materi.image : `/storage/${materi.image}`}
                                     alt={materi.title}
                                     className="w-full h-full object-cover"
                                 />

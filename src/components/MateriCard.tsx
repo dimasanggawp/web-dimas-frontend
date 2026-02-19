@@ -29,7 +29,11 @@ export default function MateriCard({ materi }: { materi: MateriProps }) {
         <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-shadow group">
             <div className="h-48 bg-slate-200 relative overflow-hidden">
                 {materi.image ? (
-                    <img src={materi.image} alt={materi.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <img
+                        src={materi.image?.startsWith('http') ? materi.image : `/storage/${materi.image}`}
+                        alt={materi.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center bg-blue-50 text-blue-200">
                         <span className="text-6xl font-bold opacity-20">TKJ</span>

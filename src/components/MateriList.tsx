@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { BookOpen, Edit, Trash2, Plus } from "lucide-react";
 import AddMateriModal from "./AddMateriModal";
+import EditMateriModal from "./EditMateriModal";
 import { getAuth } from "@/utils/auth";
 
 interface Materi {
@@ -21,6 +22,8 @@ export default function MateriList() {
     const [materis, setMateris] = useState<Materi[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [selectedMateri, setSelectedMateri] = useState<Materi | null>(null);
 
     const fetchMateri = async () => {
         setIsLoading(true);
@@ -95,6 +98,9 @@ export default function MateriList() {
                                         Judul
                                     </th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                                        Gambar
+                                    </th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                                         Penulis
                                     </th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
@@ -129,15 +135,32 @@ export default function MateriList() {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
+                                                {materi.image ? (
+                                                    <img
+                                                        src={`/storage/${materi.image}`}
+                                                        alt={materi.title}
+                                                        className="h-10 w-16 object-cover rounded"
+                                                    />
+                                                ) : (
+                                                    <span className="text-xs text-slate-400">Tidak ada gambar</span>
+                                                )}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="text-sm text-slate-900">{materi.user?.name || 'Unknown'}</div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                                                 {new Date(materi.created_at).toLocaleDateString("id-ID")}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                {/* <button className="text-indigo-600 hover:text-indigo-900 mr-4">
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedMateri(materi);
+                                                        setIsEditModalOpen(true);
+                                                    }}
+                                                    className="text-indigo-600 hover:text-indigo-900 mr-4"
+                                                >
                                                     <Edit className="h-5 w-5" />
-                                                </button> */}
+                                                </button>
                                                 <button
                                                     onClick={() => handleDelete(materi.id)}
                                                     className="text-red-600 hover:text-red-900"
@@ -158,6 +181,13 @@ export default function MateriList() {
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
                 onSuccess={fetchMateri}
+            />
+
+            <EditMateriModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                onSuccess={fetchMateri}
+                materi={selectedMateri}
             />
         </div>
     );

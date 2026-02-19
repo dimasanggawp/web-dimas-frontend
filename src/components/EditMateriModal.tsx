@@ -1,22 +1,34 @@
-import { useState } from "react";
-import { X, Loader2, Save } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, Loader2 } from "lucide-react";
 import { getAuth } from "@/utils/auth";
 import RichTextEditor from "./RichTextEditor";
 
-interface AddMateriModalProps {
+interface EditMateriModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
+    materi: any; // Type should be defined properly but 'any' is fine for now
 }
 
-export default function AddMateriModal({ isOpen, onClose, onSuccess }: AddMateriModalProps) {
+export default function EditMateriModal({ isOpen, onClose, onSuccess, materi }: EditMateriModalProps) {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [image, setImage] = useState<File | null>(null);
+    const [existingImage, setExistingImage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
 
-    if (!isOpen) return null;
+    useEffect(() => {
+        if (materi) {
+            setTitle(materi.title);
+            setContent(materi.content);
+            setExistingImage(materi.image);
+            setImage(null);
+            setError("");
+        }
+    }, [materi]);
+
+    if (!isOpen || !materi) return null;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -29,16 +41,17 @@ export default function AddMateriModal({ isOpen, onClose, onSuccess }: AddMateri
             const formData = new FormData();
             formData.append('title', title);
             formData.append('content', content);
+            formData.append('_method', 'PUT'); // Method spoofing for Laravel
+
             if (image) {
                 formData.append('image', image);
             }
 
-            const res = await fetch("/api/materi", {
-                method: "POST",
+            const res = await fetch(`/api/materi/${materi.id}`, {
+                method: "POST", // Use POST for FormData with method spoofing
                 headers: {
                     "Accept": "application/json",
                     "Authorization": `Bearer ${token}`
-                    // Jangan set Content-Type, biarkan browser set multipart/form-data boundary
                 },
                 body: formData,
             });
@@ -46,13 +59,10 @@ export default function AddMateriModal({ isOpen, onClose, onSuccess }: AddMateri
             const data = await res.json();
 
             if (res.ok) {
-                setTitle("");
-                setContent("");
-                setImage(null);
                 onSuccess();
                 onClose();
             } else {
-                setError(data.message || "Gagal membuat materi.");
+                setError(data.message || "Gagal mengupdate materi.");
             }
         } catch (err) {
             setError("Terjadi kesalahan koneksi.");
@@ -73,7 +83,7 @@ export default function AddMateriModal({ isOpen, onClose, onSuccess }: AddMateri
                 <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full relative z-10">
                     <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg leading-6 font-medium text-gray-900">Buat Materi Baru</h3>
+                            <h3 className="text-lg leading-6 font-medium text-gray-900">Edit Materi</h3>
                             <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
                                 <X className="h-6 w-6" />
                             </button>
@@ -96,12 +106,24 @@ export default function AddMateriModal({ isOpen, onClose, onSuccess }: AddMateri
                                 <RichTextEditor
                                     value={content}
                                     onChange={setContent}
-                                    placeholder="Tulis konten materi di sini..."
+                                    placeholder="Edit konten materi..."
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Gambar (Opsional)</label>
+                                <label className="block text-sm font-medium text-gray-700">Gambar</label>
+
+                                {existingImage && !image && (
+                                    <div className="mt-2 mb-2">
+                                        <p className="text-xs text-slate-500 mb-1">Gambar saat ini:</p>
+                                        <img
+                                            src={`/storage/${existingImage}`}
+                                            alt="Current"
+                                            className="h-20 w-auto object-cover rounded border"
+                                        />
+                                    </div>
+                                )}
+
                                 <input
                                     type="file"
                                     accept="image/*"
@@ -117,7 +139,10 @@ export default function AddMateriModal({ isOpen, onClose, onSuccess }: AddMateri
                                         file:bg-blue-50 file:text-blue-700
                                         hover:file:bg-blue-100"
                                 />
-                                <p className="mt-1 text-xs text-gray-500">Format: JPG, PNG, GIF, WebP. Maks 2MB.</p>
+                                <p className="mt-1 text-xs text-gray-500">
+                                    Format: JPG, PNG, GIF, WebP. Maks 2MB.
+                                    {existingImage ? " Biarkan kosong jika tidak ingin mengubah gambar." : ""}
+                                </p>
                             </div>
 
                             {error && (
@@ -137,7 +162,7 @@ export default function AddMateriModal({ isOpen, onClose, onSuccess }: AddMateri
                                     disabled={isLoading}
                                     className="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:text-sm disabled:opacity-50"
                                 >
-                                    {isLoading ? <Loader2 className="animate-spin h-5 w-5" /> : 'Simpan'}
+                                    {isLoading ? <Loader2 className="animate-spin h-5 w-5" /> : 'Simpan Perubahan'}
                                 </button>
                             </div>
                         </form>

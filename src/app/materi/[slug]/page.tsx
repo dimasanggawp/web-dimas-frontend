@@ -28,7 +28,7 @@ export default function DetailMateri() {
         // Need to check if params.slug (or slug from unwrapped params) is available
         // In client component, useParams returns the object directly
         if (params?.slug) {
-            fetch(`http://127.0.0.1:8000/api/materi/${params.slug}`)
+            fetch(`/api/materi/${params.slug}`)
                 .then(res => {
                     if (!res.ok) throw new Error("Not found");
                     return res.json();

@@ -22,7 +22,7 @@ export default function TahunAjaranList() {
         setIsLoading(true);
         try {
             const { token } = getAuth();
-            const res = await fetch("http://127.0.0.1:8000/api/tahun-ajaran", {
+            const res = await fetch("/api/tahun-ajaran", {
                 headers: {
                     "Accept": "application/json",
                     "Authorization": `Bearer ${token}`
@@ -49,7 +49,7 @@ export default function TahunAjaranList() {
 
         try {
             const { token } = getAuth();
-            const res = await fetch(`http://127.0.0.1:8000/api/tahun-ajaran/${id}`, {
+            const res = await fetch(`/api/tahun-ajaran/${id}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${token}`

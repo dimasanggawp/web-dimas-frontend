@@ -41,7 +41,7 @@ export default function BulkPromotionModal({
 
         try {
             const { token } = getAuth();
-            const res = await fetch("http://127.0.0.1:8000/api/users/bulk-promote", {
+            const res = await fetch("/api/users/bulk-promote", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

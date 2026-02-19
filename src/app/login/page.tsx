@@ -29,7 +29,7 @@ export default function LoginPage() {
         setError("");
 
         try {
-            const res = await fetch("http://127.0.0.1:8000/api/login", {
+            const res = await fetch("/api/login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -78,7 +78,7 @@ export default function LoginPage() {
                         <div className="space-y-4">
                             <div>
                                 <label htmlFor="email" className="block text-sm font-medium text-slate-700">
-                                    Email Address
+                                    Email / NISN
                                 </label>
                                 <div className="mt-1 relative rounded-md shadow-sm">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -87,13 +87,13 @@ export default function LoginPage() {
                                     <input
                                         id="email"
                                         name="email"
-                                        type="email"
+                                        type="text"
                                         autoComplete="email"
                                         required
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         className="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-lg focus:ring-primary focus:border-primary sm:text-sm transition-colors"
-                                        placeholder="nama@sekolah.sch.id"
+                                        placeholder="Email atau NISN"
                                     />
                                 </div>
                             </div>

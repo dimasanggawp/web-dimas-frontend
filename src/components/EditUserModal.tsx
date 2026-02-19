@@ -28,6 +28,8 @@ interface UserData {
     role_id: number;
     class_room?: ClassRoom;
     tahun_ajaran?: TahunAjaran;
+    nisn?: string;
+    nomor_hp?: string;
 }
 
 interface EditUserModalProps {
@@ -46,6 +48,8 @@ export default function EditUserModal({ isOpen, onClose, onSuccess, user, classe
     const [roleId, setRoleId] = useState("2"); // Default to User
     const [classId, setClassId] = useState("");
     const [academicYearId, setAcademicYearId] = useState("");
+    const [nisn, setNisn] = useState("");
+    const [nomorHp, setNomorHp] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
 
@@ -56,6 +60,8 @@ export default function EditUserModal({ isOpen, onClose, onSuccess, user, classe
             setRoleId(user.role_id.toString());
             setClassId(user.class_room?.id?.toString() || "");
             setAcademicYearId(user.tahun_ajaran?.id?.toString() || "");
+            setNisn(user.nisn || "");
+            setNomorHp(user.nomor_hp || "");
             setPassword(""); // Don't prefill password
             setError("");
         }
@@ -76,13 +82,15 @@ export default function EditUserModal({ isOpen, onClose, onSuccess, user, classe
                 role_id: roleId,
                 class_room_id: roleId === "2" ? classId : null,
                 tahun_ajaran_id: roleId === "2" ? academicYearId : null,
+                nisn: roleId === "2" ? nisn : null,
+                nomor_hp: roleId === "2" ? nomorHp : null,
             };
 
             if (password) {
                 body.password = password;
             }
 
-            const res = await fetch(`http://127.0.0.1:8000/api/users/${user.id}`, {
+            const res = await fetch(`/api/users/${user.id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -201,6 +209,28 @@ export default function EditUserModal({ isOpen, onClose, onSuccess, user, classe
                                                 <option key={ay.id} value={ay.id}>{ay.tahun} {ay.is_active ? '(Aktif)' : ''}</option>
                                             ))}
                                         </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">NISN</label>
+                                        <input
+                                            type="text"
+                                            value={nisn}
+                                            onChange={(e) => setNisn(e.target.value)}
+                                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                                            placeholder="Opsional"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">Nomor HP</label>
+                                        <input
+                                            type="text"
+                                            value={nomorHp}
+                                            onChange={(e) => setNomorHp(e.target.value)}
+                                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                                            placeholder="Opsional"
+                                        />
                                     </div>
                                 </>
                             )}

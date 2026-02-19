@@ -44,8 +44,8 @@ export default function AddTahunAjaranModal({ isOpen, onClose, onSuccess, initia
         try {
             const { token } = getAuth();
             const url = initialData
-                ? `http://127.0.0.1:8000/api/tahun-ajaran/${initialData.id}`
-                : "http://127.0.0.1:8000/api/tahun-ajaran";
+                ? `/api/tahun-ajaran/${initialData.id}`
+                : "/api/tahun-ajaran";
 
             const res = await fetch(url, {
                 method: initialData ? "PUT" : "POST",

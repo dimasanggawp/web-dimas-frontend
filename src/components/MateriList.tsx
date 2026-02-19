@@ -25,7 +25,7 @@ export default function MateriList() {
     const fetchMateri = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch("http://127.0.0.1:8000/api/materi");
+            const res = await fetch("/api/materi");
             if (res.ok) {
                 const data = await res.json();
                 setMateris(data);
@@ -46,7 +46,7 @@ export default function MateriList() {
 
         try {
             const { token } = getAuth();
-            const res = await fetch(`http://127.0.0.1:8000/api/materi/${id}`, {
+            const res = await fetch(`/api/materi/${id}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${token}`

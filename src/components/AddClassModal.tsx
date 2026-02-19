@@ -40,8 +40,8 @@ export default function AddClassModal({ isOpen, onClose, onSuccess, initialData 
         try {
             const { token } = getAuth();
             const url = initialData
-                ? `http://127.0.0.1:8000/api/class-rooms/${initialData.id}`
-                : "http://127.0.0.1:8000/api/class-rooms";
+                ? `/api/class-rooms/${initialData.id}`
+                : "/api/class-rooms";
 
             const res = await fetch(url, {
                 method: initialData ? "PUT" : "POST",

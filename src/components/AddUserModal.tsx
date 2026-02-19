@@ -17,6 +17,8 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
     const [roleId, setRoleId] = useState("2"); // Default to user (2), assuming 1 is admin
     const [classId, setClassId] = useState("");
     const [academicYearId, setAcademicYearId] = useState("");
+    const [nisn, setNisn] = useState("");
+    const [nomorHp, setNomorHp] = useState("");
     const [classes, setClasses] = useState<any[]>([]);
     const [academicYears, setAcademicYears] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -25,7 +27,7 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
     const fetchClasses = async () => {
         try {
             const { token } = getAuth();
-            const res = await fetch("http://127.0.0.1:8000/api/class-rooms", {
+            const res = await fetch("/api/class-rooms", {
                 headers: { "Authorization": `Bearer ${token}` }
             });
             if (res.ok) setClasses(await res.json());
@@ -37,7 +39,7 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
     const fetchAcademicYears = async () => {
         try {
             const { token } = getAuth();
-            const res = await fetch("http://127.0.0.1:8000/api/tahun-ajaran", {
+            const res = await fetch("/api/tahun-ajaran", {
                 headers: { "Authorization": `Bearer ${token}` }
             });
             if (res.ok) setAcademicYears(await res.json());
@@ -62,7 +64,7 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
 
         try {
             const { token } = getAuth();
-            const res = await fetch("http://127.0.0.1:8000/api/users", {
+            const res = await fetch("/api/users", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -76,6 +78,8 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
                     role_id: parseInt(roleId),
                     class_room_id: roleId === "2" ? classId : null,
                     tahun_ajaran_id: roleId === "2" ? academicYearId : null,
+                    nisn: roleId === "2" ? nisn : null,
+                    nomor_hp: roleId === "2" ? nomorHp : null,
                 }),
             });
 
@@ -88,6 +92,8 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
                 setRoleId("2");
                 setClassId("");
                 setAcademicYearId("");
+                setNisn("");
+                setNomorHp("");
                 onSuccess();
                 onClose();
             } else {
@@ -142,10 +148,9 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Password</label>
+                                <label className="block text-sm font-medium text-gray-700">Password (Kosongkan = Gunakan No HP)</label>
                                 <input
                                     type="password"
-                                    required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
@@ -194,6 +199,28 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
                                                 <option key={ay.id} value={ay.id}>{ay.tahun} {ay.is_active ? '(Aktif)' : ''}</option>
                                             ))}
                                         </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">NISN</label>
+                                        <input
+                                            type="text"
+                                            value={nisn}
+                                            onChange={(e) => setNisn(e.target.value)}
+                                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                                            placeholder="Opsional"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">Nomor HP</label>
+                                        <input
+                                            type="text"
+                                            value={nomorHp}
+                                            onChange={(e) => setNomorHp(e.target.value)}
+                                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                                            placeholder="Opsional"
+                                        />
                                     </div>
                                 </>
                             )}

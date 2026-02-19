@@ -29,7 +29,7 @@ export default function Dashboard() {
         setLoading(false);
 
         // Fetch simple stats
-        fetch("http://127.0.0.1:8000/api/materi")
+        fetch("/api/materi")
             .then(res => res.json())
             .then(data => setStats({ total_materi: data.length }))
             .catch(err => console.error(err));

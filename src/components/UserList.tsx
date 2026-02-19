@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { User, Shield, Trash2, Edit, Search, ArrowUpDown, ArrowUp, ArrowDown, ArrowUpCircle, Users } from "lucide-react";
+import { User, Shield, Trash2, Edit, Search, ArrowUpDown, ArrowUp, ArrowDown, ArrowUpCircle, Users, FileSpreadsheet } from "lucide-react";
 import AddUserModal from "./AddUserModal";
 import EditUserModal from "./EditUserModal";
 import BulkPromotionModal from "./BulkPromotionModal";
 import BulkAssignModal from "./BulkAssignModal";
+import ImportUserModal from "./ImportUserModal";
 import { getAuth } from "@/utils/auth";
 
 interface Role {
@@ -32,6 +33,8 @@ interface UserData {
     role_id: number;
     class_room?: ClassRoom;
     tahun_ajaran?: TahunAjaran;
+    nisn?: string;
+    nomor_hp?: string;
     created_at: string;
 }
 
@@ -54,13 +57,14 @@ export default function UserList() {
     const [isBulkPromotionModalOpen, setIsBulkPromotionModalOpen] = useState(false);
     const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
     const [isBulkAssignModalOpen, setIsBulkAssignModalOpen] = useState(false);
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
     const fetchUsers = async () => {
         setIsLoading(true);
         try {
             const { token } = getAuth();
             console.log("Fetching users with token:", token);
-            const res = await fetch("http://127.0.0.1:8000/api/users", {
+            const res = await fetch("/api/users", {
                 headers: {
                     "Accept": "application/json",
                     "Authorization": `Bearer ${token}`
@@ -86,7 +90,7 @@ export default function UserList() {
     const fetchClasses = async () => {
         try {
             const { token } = getAuth();
-            const res = await fetch("http://127.0.0.1:8000/api/class-rooms", {
+            const res = await fetch("/api/class-rooms", {
                 headers: { "Authorization": `Bearer ${token}` }
             });
             if (res.ok) setClasses(await res.json());
@@ -98,7 +102,7 @@ export default function UserList() {
     const fetchAcademicYears = async () => {
         try {
             const { token } = getAuth();
-            const res = await fetch("http://127.0.0.1:8000/api/tahun-ajaran", {
+            const res = await fetch("/api/tahun-ajaran", {
                 headers: { "Authorization": `Bearer ${token}` }
             });
             if (res.ok) setAcademicYears(await res.json());
@@ -172,7 +176,7 @@ export default function UserList() {
 
         try {
             const { token } = getAuth();
-            const res = await fetch(`http://127.0.0.1:8000/api/users/${id}`, {
+            const res = await fetch(`/api/users/${id}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${token}`
@@ -255,6 +259,13 @@ export default function UserList() {
                     >
                         <ArrowUpCircle className="mr-2 h-4 w-4" />
                         Kenaikan Kelas
+                    </button>
+                    <button
+                        onClick={() => setIsImportModalOpen(true)}
+                        className="inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 relative"
+                    >
+                        <FileSpreadsheet className="mr-2 h-4 w-4 text-green-600" />
+                        Import Excel
                     </button>
                     <button
                         onClick={() => setIsModalOpen(true)}
@@ -488,6 +499,12 @@ export default function UserList() {
                 selectedUsers={filteredAndSortedUsers.filter(u => selectedUserIds.includes(u.id))}
                 classes={classes}
                 academicYears={academicYears}
+            />
+
+            <ImportUserModal
+                isOpen={isImportModalOpen}
+                onClose={() => setIsImportModalOpen(false)}
+                onSuccess={fetchUsers}
             />
         </div>
     );

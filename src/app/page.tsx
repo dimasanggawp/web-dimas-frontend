@@ -26,7 +26,7 @@ export default function Home() {
   useEffect(() => {
     async function fetchMateri() {
       try {
-        const res = await fetch('http://127.0.0.1:8000/api/materi');
+        const res = await fetch('/api/materi');
         if (res.ok) {
           const data = await res.json();
           setMateris(data);

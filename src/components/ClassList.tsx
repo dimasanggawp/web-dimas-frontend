@@ -21,7 +21,7 @@ export default function ClassList() {
         setIsLoading(true);
         try {
             const { token } = getAuth();
-            const res = await fetch("http://127.0.0.1:8000/api/class-rooms", {
+            const res = await fetch("/api/class-rooms", {
                 headers: {
                     "Accept": "application/json",
                     "Authorization": `Bearer ${token}`
@@ -48,7 +48,7 @@ export default function ClassList() {
 
         try {
             const { token } = getAuth();
-            const res = await fetch(`http://127.0.0.1:8000/api/class-rooms/${id}`, {
+            const res = await fetch(`/api/class-rooms/${id}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${token}`

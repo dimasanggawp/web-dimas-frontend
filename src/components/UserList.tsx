@@ -136,9 +136,10 @@ export default function UserList() {
     // Filtered and sorted users
     const filteredAndSortedUsers = useMemo(() => {
         let filtered = users.filter(user => {
-            // Search by name or email
+            // Search by name, email, or NISN
             const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                user.email.toLowerCase().includes(searchQuery.toLowerCase());
+                user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                (user.nisn && user.nisn.includes(searchQuery));
 
             // Filter by role
             const matchesRole = !filterRole || user.role_id.toString() === filterRole;
@@ -180,6 +181,10 @@ export default function UserList() {
                     aValue = a.tahun_ajaran?.tahun || '';
                     bValue = b.tahun_ajaran?.tahun || '';
                     break;
+                case 'nisn':
+                    aValue = a.nisn || '';
+                    bValue = b.nisn || '';
+                    break;
             }
 
             if (sortDirection === 'asc') {
@@ -217,7 +222,7 @@ export default function UserList() {
         setIsEditModalOpen(true);
     };
 
-    const handleSort = (column: 'name' | 'email' | 'role' | 'class' | 'academic_year') => {
+    const handleSort = (column: 'name' | 'email' | 'role' | 'class' | 'academic_year' | 'nisn') => {
         if (sortBy === column) {
             setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
         } else {
@@ -301,7 +306,7 @@ export default function UserList() {
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                     <input
                         type="text"
-                        placeholder="Cari user berdasarkan nama atau email..."
+                        placeholder="Cari user berdasarkan nama, email, atau NISN..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -404,6 +409,16 @@ export default function UserList() {
                                             </div>
                                         </th>
                                         <th
+                                            onClick={() => handleSort('nisn')}
+                                            scope="col"
+                                            className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                NISN
+                                                <SortIcon column="nisn" />
+                                            </div>
+                                        </th>
+                                        <th
                                             onClick={() => handleSort('role')}
                                             scope="col"
                                             className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100"
@@ -467,6 +482,9 @@ export default function UserList() {
                                                         <div className="text-sm text-slate-500">{user.email}</div>
                                                     </div>
                                                 </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                                {user.nisn || '-'}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.role?.name === 'admin' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-800'}`}>

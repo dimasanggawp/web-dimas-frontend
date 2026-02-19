@@ -8,6 +8,7 @@ interface MateriProps {
     content: string;
     image?: string;
     created_at: string;
+    deadline?: string | null;
     user: {
         name: string;
     };
@@ -51,6 +52,14 @@ export default function MateriCard({ materi }: { materi: MateriProps }) {
                         {materi.user?.name}
                     </div>
                 </div>
+                {materi.deadline && (
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full mb-3 w-fit uppercase tracking-wider">
+                        <Calendar className="w-3 h-3" />
+                        Deadline: {new Date(materi.deadline).toLocaleDateString('id-ID', {
+                            day: 'numeric', month: 'short', year: 'numeric'
+                        })}
+                    </div>
+                )}
                 <h3 className="text-xl font-bold text-slate-800 mb-2 group-hover:text-primary transition-colors">
                     <Link href={`/materi/${materi.slug}`}>
                         {materi.title}

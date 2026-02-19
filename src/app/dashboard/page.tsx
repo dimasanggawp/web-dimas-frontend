@@ -9,6 +9,7 @@ import MateriList from "@/components/MateriList";
 import TahunAjaranList from "@/components/TahunAjaranList";
 import ClassList from "@/components/ClassList";
 import { getAuth } from "@/utils/auth";
+import { fetchWithAuth } from "@/utils/apiWrapper";
 
 export default function Dashboard() {
     const router = useRouter();
@@ -25,11 +26,16 @@ export default function Dashboard() {
             return;
         }
 
+        if (userData.role?.name !== 'admin') {
+            router.push("/student-dashboard");
+            return;
+        }
+
         setUser(userData);
         setLoading(false);
 
         // Fetch simple stats
-        fetch("/api/materi")
+        fetchWithAuth("/api/materi")
             .then(res => res.json())
             .then(data => setStats({ total_materi: data.length }))
             .catch(err => console.error(err));

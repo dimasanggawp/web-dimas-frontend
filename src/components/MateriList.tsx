@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { BookOpen, Edit, Trash2, Plus } from "lucide-react";
 import AddMateriModal from "./AddMateriModal";
 import EditMateriModal from "./EditMateriModal";
+import SubmissionListModal from "./SubmissionListModal";
 import { fetchWithAuth } from "@/utils/apiWrapper";
+import { ClipboardList } from "lucide-react";
 
 interface Materi {
     id: number;
@@ -23,6 +25,7 @@ export default function MateriList() {
     const [isLoading, setIsLoading] = useState(true);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isSubmissionModalOpen, setIsSubmissionModalOpen] = useState(false);
     const [selectedMateri, setSelectedMateri] = useState<Materi | null>(null);
 
     const fetchMateri = async () => {
@@ -158,6 +161,16 @@ export default function MateriList() {
                                                     <Edit className="h-5 w-5" />
                                                 </button>
                                                 <button
+                                                    onClick={() => {
+                                                        setSelectedMateri(materi);
+                                                        setIsSubmissionModalOpen(true);
+                                                    }}
+                                                    className="text-green-600 hover:text-green-900 mr-4"
+                                                    title="Lihat Pengumpulan Tugas"
+                                                >
+                                                    <ClipboardList className="h-5 w-5" />
+                                                </button>
+                                                <button
                                                     onClick={() => handleDelete(materi.id)}
                                                     className="text-red-600 hover:text-red-900"
                                                 >
@@ -183,6 +196,12 @@ export default function MateriList() {
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
                 onSuccess={fetchMateri}
+                materi={selectedMateri}
+            />
+
+            <SubmissionListModal
+                isOpen={isSubmissionModalOpen}
+                onClose={() => setIsSubmissionModalOpen(false)}
                 materi={selectedMateri}
             />
         </div>

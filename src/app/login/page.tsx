@@ -45,9 +45,12 @@ export default function LoginPage() {
                 setAuth(data.access_token, data.user, remember);
 
                 // Redirect based on role or to home
-                router.push("/dashboard");
-                // Force refresh to update Navbar state if we implement that later
-                window.location.href = "/dashboard";
+                // Redirect based on role
+                if (data.user.role?.name === 'admin') {
+                    window.location.href = "/dashboard";
+                } else {
+                    window.location.href = "/student-dashboard";
+                }
             } else {
                 setError(data.message || "Login gagal. Periksa kembali email dan password Anda.");
             }

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import MateriCard from "@/components/MateriCard";
 import { Loader2 } from "lucide-react";
+import { fetchWithAuth } from "@/utils/apiWrapper";
 
 interface Materi {
     id: number;
@@ -12,6 +13,7 @@ interface Materi {
     content: string;
     image?: string;
     created_at: string;
+    deadline?: string | null;
     user: {
         name: string;
     };
@@ -24,7 +26,7 @@ export default function MateriIndex() {
     useEffect(() => {
         async function fetchMateri() {
             try {
-                const res = await fetch('/api/materi');
+                const res = await fetchWithAuth('/api/materi');
                 if (res.ok) {
                     const data = await res.json();
                     setMateris(data);

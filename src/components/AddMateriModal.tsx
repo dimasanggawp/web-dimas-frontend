@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Loader2, Save } from "lucide-react";
 import { fetchWithAuth } from "@/utils/apiWrapper";
 import RichTextEditor from "./RichTextEditor";
@@ -13,8 +13,20 @@ export default function AddMateriModal({ isOpen, onClose, onSuccess }: AddMateri
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [image, setImage] = useState<File | null>(null);
+    const [deadline, setDeadline] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
+    const [classes, setClasses] = useState<any[]>([]);
+    const [selectedClasses, setSelectedClasses] = useState<number[]>([]);
+
+    useEffect(() => {
+        if (isOpen) {
+            fetchWithAuth("/api/class-rooms")
+                .then(res => res.json())
+                .then(data => setClasses(data))
+                .catch(err => console.error("Gagal mengambil data kelas", err));
+        }
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -27,6 +39,12 @@ export default function AddMateriModal({ isOpen, onClose, onSuccess }: AddMateri
             const formData = new FormData();
             formData.append('title', title);
             formData.append('content', content);
+            if (deadline) {
+                formData.append('deadline', deadline);
+            }
+            selectedClasses.forEach(id => {
+                formData.append('class_room_ids[]', id.toString());
+            });
             if (image) {
                 formData.append('image', image);
             }
@@ -43,6 +61,8 @@ export default function AddMateriModal({ isOpen, onClose, onSuccess }: AddMateri
                 setTitle("");
                 setContent("");
                 setImage(null);
+                setDeadline("");
+                setSelectedClasses([]);
                 onSuccess();
                 onClose();
             } else {
@@ -92,6 +112,43 @@ export default function AddMateriModal({ isOpen, onClose, onSuccess }: AddMateri
                                     onChange={setContent}
                                     placeholder="Tulis konten materi di sini..."
                                 />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Deadline Pengumpulan (Opsional)</label>
+                                <input
+                                    type="datetime-local"
+                                    value={deadline}
+                                    onChange={(e) => setDeadline(e.target.value)}
+                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2 text-primary font-bold">Berikan ke Kelas</label>
+                                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-3 border border-slate-200 rounded-lg bg-slate-50">
+                                    {classes.map((cls) => (
+                                        <label key={cls.id} className="flex items-center gap-2 cursor-pointer hover:bg-white p-1 rounded transition-colors">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedClasses.includes(cls.id)}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) {
+                                                        setSelectedClasses([...selectedClasses, cls.id]);
+                                                    } else {
+                                                        setSelectedClasses(selectedClasses.filter(id => id !== cls.id));
+                                                    }
+                                                }}
+                                                className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
+                                            />
+                                            <span className="text-sm text-slate-700">{cls.name}</span>
+                                        </label>
+                                    ))}
+                                    {classes.length === 0 && (
+                                        <p className="text-xs text-slate-400 italic col-span-2">Tidak ada data kelas.</p>
+                                    )}
+                                </div>
+                                <p className="mt-1 text-[10px] text-slate-500 italic">* Lewati jika materi ini ingin dibagikan ke seluruh siswa (publik).</p>
                             </div>
 
                             <div className="mt-8">

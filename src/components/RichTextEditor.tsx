@@ -118,7 +118,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
                 modules={modules}
                 formats={formats}
                 placeholder={placeholder}
-                className="h-64 mb-12" // mb-12 untuk memberi ruang toolbar bottom jika ada overflow
+                className="h-64 mb-16" // mb-16 untuk memberi ruang toolbar bottom jika ada overflow
             />
         </div>
     );

@@ -19,14 +19,41 @@ export default function EditMateriModal({ isOpen, onClose, onSuccess, materi }: 
     const [error, setError] = useState("");
 
     useEffect(() => {
-        if (materi) {
+        if (materi && isOpen) {
+            // Set initial basic data available from list (except content which is truncated)
             setTitle(materi.title);
-            setContent(materi.content);
             setExistingImage(materi.image);
             setImage(null);
             setError("");
+
+            // Set loading state while fetching full content
+            // We use a separate loading state or just Content loading? 
+            // Reuse isLoading but be careful it blocks the form.
+            // Let's use a local loading state for data fetching if needed, or just reuse isLoading 
+            // provided the form buttons handle it correctly. 
+            // Actually, better to block the UI until data is loaded.
+            setIsLoading(true);
+
+            fetchWithAuth(`/api/materi/${materi.slug}`)
+                .then(res => {
+                    if (!res.ok) throw new Error("Failed to fetch");
+                    return res.json();
+                })
+                .then(data => {
+                    setContent(data.content); // content here is full HTML
+                    // Update other fields to be sure
+                    setTitle(data.title);
+                    setExistingImage(data.image);
+                })
+                .catch(err => {
+                    console.error(err);
+                    setError("Gagal mengambil konten lengkap materi.");
+                })
+                .finally(() => {
+                    setIsLoading(false);
+                });
         }
-    }, [materi]);
+    }, [materi, isOpen]);
 
     if (!isOpen || !materi) return null;
 
@@ -104,7 +131,7 @@ export default function EditMateriModal({ isOpen, onClose, onSuccess, materi }: 
                                 />
                             </div>
 
-                            <div>
+                            <div className="mt-8">
                                 <label className="block text-sm font-medium text-gray-700">Gambar</label>
 
                                 {existingImage && !image && (

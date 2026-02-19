@@ -94,7 +94,7 @@ export default function AddMateriModal({ isOpen, onClose, onSuccess }: AddMateri
                                 />
                             </div>
 
-                            <div>
+                            <div className="mt-8">
                                 <label className="block text-sm font-medium text-gray-700">Gambar (Opsional)</label>
                                 <input
                                     type="file"

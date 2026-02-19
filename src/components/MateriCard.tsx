@@ -15,7 +15,8 @@ interface MateriProps {
 
 export default function MateriCard({ materi }: { materi: MateriProps }) {
     // Truncate content for summary
-    const summary = materi.content.substring(0, 100) + "...";
+    // Backend already sends truncated plain text
+    const summary = materi.content;
 
     // Format date
     const date = new Date(materi.created_at).toLocaleDateString('id-ID', {

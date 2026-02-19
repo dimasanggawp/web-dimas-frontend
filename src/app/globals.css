@@ -52,23 +52,73 @@ body {
 }
 
 /* Dark mode overrides for common Tailwind classes */
-.dark .bg-white { background-color: var(--card) !important; }
-.dark .bg-slate-50 { background-color: #1e293b !important; }
-.dark .bg-slate-100 { background-color: #334155 !important; }
-.dark .bg-slate-200 { background-color: #475569 !important; }
-.dark .text-slate-900 { color: #f1f5f9 !important; }
-.dark .text-slate-800 { color: #e2e8f0 !important; }
-.dark .text-slate-700 { color: #cbd5e1 !important; }
-.dark .text-slate-600 { color: #94a3b8 !important; }
-.dark .text-slate-500 { color: #64748b !important; }
-.dark .border-slate-200 { border-color: #334155 !important; }
-.dark .border-slate-100 { border-color: #1e293b !important; }
-.dark .border-slate-300 { border-color: #475569 !important; }
-.dark .divide-slate-200 > * + * { border-color: #334155 !important; }
-.dark .shadow { box-shadow: 0 1px 3px rgba(0,0,0,0.4) !important; }
-.dark .shadow-sm { box-shadow: 0 1px 2px rgba(0,0,0,0.4) !important; }
-.dark .shadow-lg { box-shadow: 0 10px 15px rgba(0,0,0,0.5) !important; }
-.dark .shadow-xl { box-shadow: 0 20px 25px rgba(0,0,0,0.6) !important; }
+.dark .bg-white {
+  background-color: var(--card) !important;
+}
+
+.dark .bg-slate-50 {
+  background-color: #1e293b !important;
+}
+
+.dark .bg-slate-100 {
+  background-color: #334155 !important;
+}
+
+.dark .bg-slate-200 {
+  background-color: #475569 !important;
+}
+
+.dark .text-slate-900 {
+  color: #f1f5f9 !important;
+}
+
+.dark .text-slate-800 {
+  color: #e2e8f0 !important;
+}
+
+.dark .text-slate-700 {
+  color: #cbd5e1 !important;
+}
+
+.dark .text-slate-600 {
+  color: #94a3b8 !important;
+}
+
+.dark .text-slate-500 {
+  color: #64748b !important;
+}
+
+.dark .border-slate-200 {
+  border-color: #334155 !important;
+}
+
+.dark .border-slate-100 {
+  border-color: #1e293b !important;
+}
+
+.dark .border-slate-300 {
+  border-color: #475569 !important;
+}
+
+.dark .divide-slate-200>*+* {
+  border-color: #334155 !important;
+}
+
+.dark .shadow {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+}
+
+.dark .shadow-sm {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+}
+
+.dark .shadow-lg {
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.5) !important;
+}
+
+.dark .shadow-xl {
+  box-shadow: 0 20px 25px rgba(0, 0, 0, 0.6) !important;
+}
 
 /* Input fields in dark mode */
 .dark input,
@@ -78,10 +128,12 @@ body {
   color: #f1f5f9 !important;
   border-color: #475569 !important;
 }
+
 .dark input::placeholder,
 .dark textarea::placeholder {
   color: #64748b !important;
 }
+
 .dark input:focus,
 .dark select:focus,
 .dark textarea:focus {
@@ -89,8 +141,13 @@ body {
 }
 
 /* Hover states */
-.dark .hover\:bg-slate-50:hover { background-color: #334155 !important; }
-.dark .hover\:bg-slate-100:hover { background-color: #475569 !important; }
+.dark .hover\:bg-slate-50:hover {
+  background-color: #334155 !important;
+}
+
+.dark .hover\:bg-slate-100:hover {
+  background-color: #475569 !important;
+}
 
 /* Navbar dark mode */
 .dark nav.navbar-glass {
@@ -101,4 +158,80 @@ body {
 /* Modal dark mode */
 .dark .modal-overlay {
   background-color: rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Quill Rich Text Display Support */
+.ql-align-center {
+  text-align: center;
+}
+
+.ql-align-right {
+  text-align: right;
+}
+
+.ql-align-justify {
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+/* Target inline styles for justify as well */
+[style*="text-align: justify"] {
+  text-justify: inter-word;
+}
+
+/* Quill Indentation */
+.ql-indent-1 {
+  padding-left: 3em;
+}
+
+.ql-indent-2 {
+  padding-left: 6em;
+}
+
+.ql-indent-3 {
+  padding-left: 9em;
+}
+
+.ql-indent-4 {
+  padding-left: 12em;
+}
+
+.ql-indent-5 {
+  padding-left: 15em;
+}
+
+.ql-indent-6 {
+  padding-left: 18em;
+}
+
+.ql-indent-7 {
+  padding-left: 21em;
+}
+
+.ql-indent-8 {
+  padding-left: 24em;
+}
+
+/* Ensure lists inside prose respect Quill indentation classes if applied */
+.prose .ql-indent-1,
+.prose .ql-indent-2,
+.prose .ql-indent-3 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* Explicit list styles for prose */
+.prose ul {
+  list-style-type: disc;
+  padding-left: 1.5em;
+}
+
+.prose ol {
+  list-style-type: decimal;
+  padding-left: 1.5em;
+}
+
+.prose li {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
 }

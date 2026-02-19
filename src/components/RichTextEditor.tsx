@@ -2,11 +2,31 @@
 
 import { useRef, useMemo } from "react";
 import dynamic from "next/dynamic";
-import "react-quill/dist/quill.snow.css";
-import { getAuth } from "@/utils/auth";
+import "react-quill-new/dist/quill.snow.css";
+import { fetchWithAuth } from "@/utils/apiWrapper";
 
-// Import ReactQuill secara dynamic untuk menghindari error SSR
-const ReactQuill = dynamic(() => import("react-quill"), {
+// Import ReactQuill dynamically to avoid SSR errors and register attributors
+const ReactQuill = dynamic(async () => {
+    const { default: RQ, Quill } = await import("react-quill-new");
+
+    // Register Style Attributors to use inline styles instead of classes
+    // This improves compatibility with content pasted from Word/Google Docs
+    const Align = Quill.import("attributors/style/align");
+    const Direction = Quill.import("attributors/style/direction");
+    const Background = Quill.import("attributors/style/background");
+    const Color = Quill.import("attributors/style/color");
+    const Size = Quill.import("attributors/style/size");
+    const Font = Quill.import("attributors/style/font");
+
+    Quill.register(Align as any, true);
+    Quill.register(Direction as any, true);
+    Quill.register(Background as any, true);
+    Quill.register(Color as any, true);
+    Quill.register(Size as any, true);
+    Quill.register(Font as any, true);
+
+    return RQ;
+}, {
     ssr: false,
     loading: () => <div className="h-64 bg-slate-100 animate-pulse rounded-md"></div>
 }) as any;
@@ -33,12 +53,8 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
                 formData.append('image', file);
 
                 try {
-                    const { token } = getAuth();
-                    const res = await fetch('/api/upload-image', {
+                    const res = await fetchWithAuth('/api/upload-image', {
                         method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        },
                         body: formData
                     });
 
@@ -65,20 +81,30 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
             container: [
                 [{ 'header': [1, 2, 3, false] }],
                 ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+                [{ 'script': 'sub' }, { 'script': 'super' }],
+                [{ 'align': [] }],
                 ['link', 'image'],
                 ['clean']
             ],
             handlers: {
                 image: imageHandler
             }
+        },
+        clipboard: {
+            // Toggle to match visual representation better for lists
+            matchVisual: false
         }
     }), []);
 
     const formats = [
         'header',
         'bold', 'italic', 'underline', 'strike', 'blockquote',
-        'list', 'bullet',
+        'color', 'background',
+        'list', 'indent',
+        'script',
+        'align',
         'link', 'image'
     ];
 

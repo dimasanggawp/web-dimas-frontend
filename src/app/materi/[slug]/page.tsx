@@ -120,9 +120,10 @@ export default function DetailMateri() {
                             </h1>
 
                             {/* Content */}
-                            <div className="prose prose-lg prose-slate max-w-none text-slate-700 leading-relaxed whitespace-pre-wrap">
-                                {materi.content}
-                            </div>
+                            <div
+                                className="prose md:prose-lg prose-slate max-w-none text-slate-700 leading-relaxed overflow-hidden hyphens-auto break-words [&_img]:!w-full [&_img]:!h-auto [&_img]:!object-contain [&_iframe]:!w-full [&_video]:!w-full [&_table]:!w-full [&_table]:block [&_table]:overflow-x-auto [&_*]:max-w-full"
+                                dangerouslySetInnerHTML={{ __html: materi.content.replace(/&nbsp;/g, ' ') }}
+                            />
                         </div>
                     </article>
                 </div>

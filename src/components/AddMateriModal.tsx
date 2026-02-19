@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { X, Loader2, Save } from "lucide-react";
-import { getAuth } from "@/utils/auth";
+import { fetchWithAuth } from "@/utils/apiWrapper";
 import RichTextEditor from "./RichTextEditor";
 
 interface AddMateriModalProps {
@@ -24,8 +24,6 @@ export default function AddMateriModal({ isOpen, onClose, onSuccess }: AddMateri
         setError("");
 
         try {
-            const { token } = getAuth();
-
             const formData = new FormData();
             formData.append('title', title);
             formData.append('content', content);
@@ -33,13 +31,9 @@ export default function AddMateriModal({ isOpen, onClose, onSuccess }: AddMateri
                 formData.append('image', image);
             }
 
-            const res = await fetch("/api/materi", {
+            const res = await fetchWithAuth("/api/materi", {
                 method: "POST",
-                headers: {
-                    "Accept": "application/json",
-                    "Authorization": `Bearer ${token}`
-                    // Jangan set Content-Type, biarkan browser set multipart/form-data boundary
-                },
+                // Headers handled by wrapper, multipart handled by browser
                 body: formData,
             });
 

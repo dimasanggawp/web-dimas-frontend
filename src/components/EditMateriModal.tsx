@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, Loader2 } from "lucide-react";
-import { getAuth } from "@/utils/auth";
+import { fetchWithAuth } from "@/utils/apiWrapper";
 import RichTextEditor from "./RichTextEditor";
 
 interface EditMateriModalProps {
@@ -36,8 +36,6 @@ export default function EditMateriModal({ isOpen, onClose, onSuccess, materi }: 
         setError("");
 
         try {
-            const { token } = getAuth();
-
             const formData = new FormData();
             formData.append('title', title);
             formData.append('content', content);
@@ -47,12 +45,8 @@ export default function EditMateriModal({ isOpen, onClose, onSuccess, materi }: 
                 formData.append('image', image);
             }
 
-            const res = await fetch(`/api/materi/${materi.id}`, {
+            const res = await fetchWithAuth(`/api/materi/${materi.id}`, {
                 method: "POST", // Use POST for FormData with method spoofing
-                headers: {
-                    "Accept": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
                 body: formData,
             });
 

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { BookOpen, Edit, Trash2, Plus } from "lucide-react";
 import AddMateriModal from "./AddMateriModal";
 import EditMateriModal from "./EditMateriModal";
-import { getAuth } from "@/utils/auth";
+import { fetchWithAuth } from "@/utils/apiWrapper";
 
 interface Materi {
     id: number;
@@ -28,7 +28,7 @@ export default function MateriList() {
     const fetchMateri = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch("/api/materi");
+            const res = await fetchWithAuth("/api/materi");
             if (res.ok) {
                 const data = await res.json();
                 setMateris(data);
@@ -48,12 +48,8 @@ export default function MateriList() {
         if (!confirm("Apakah Anda yakin ingin menghapus materi ini?")) return;
 
         try {
-            const { token } = getAuth();
-            const res = await fetch(`/api/materi/${id}`, {
+            const res = await fetchWithAuth(`/api/materi/${id}`, {
                 method: "DELETE",
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
             });
 
             if (res.ok) {
@@ -114,7 +110,7 @@ export default function MateriList() {
                             <tbody className="bg-white divide-y divide-slate-200">
                                 {materis.length === 0 ? (
                                     <tr>
-                                        <td colSpan={4} className="px-6 py-4 text-center text-slate-500 italic">
+                                        <td colSpan={5} className="px-6 py-4 text-center text-slate-500 italic">
                                             Belum ada materi.
                                         </td>
                                     </tr>

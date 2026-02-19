@@ -30,6 +30,7 @@ interface UserData {
     tahun_ajaran?: TahunAjaran;
     nisn?: string;
     nomor_hp?: string;
+    status?: string;
 }
 
 interface EditUserModalProps {
@@ -50,6 +51,7 @@ export default function EditUserModal({ isOpen, onClose, onSuccess, user, classe
     const [academicYearId, setAcademicYearId] = useState("");
     const [nisn, setNisn] = useState("");
     const [nomorHp, setNomorHp] = useState("");
+    const [status, setStatus] = useState("aktif");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
 
@@ -62,6 +64,7 @@ export default function EditUserModal({ isOpen, onClose, onSuccess, user, classe
             setAcademicYearId(user.tahun_ajaran?.id?.toString() || "");
             setNisn(user.nisn || "");
             setNomorHp(user.nomor_hp || "");
+            setStatus(user.status || "aktif");
             setPassword(""); // Don't prefill password
             setError("");
         }
@@ -84,6 +87,7 @@ export default function EditUserModal({ isOpen, onClose, onSuccess, user, classe
                 tahun_ajaran_id: roleId === "2" ? academicYearId : null,
                 nisn: roleId === "2" ? nisn : null,
                 nomor_hp: roleId === "2" ? nomorHp : null,
+                status,
             };
 
             if (password) {
@@ -165,6 +169,19 @@ export default function EditUserModal({ isOpen, onClose, onSuccess, user, classe
                                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                                     placeholder="********"
                                 />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Status</label>
+                                <select
+                                    value={status}
+                                    onChange={(e) => setStatus(e.target.value)}
+                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                                >
+                                    <option value="aktif">Aktif</option>
+                                    <option value="tidak_aktif">Tidak Aktif</option>
+                                    <option value="lulus">Lulus</option>
+                                </select>
                             </div>
 
                             <div>

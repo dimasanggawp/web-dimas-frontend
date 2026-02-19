@@ -19,6 +19,7 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
     const [academicYearId, setAcademicYearId] = useState("");
     const [nisn, setNisn] = useState("");
     const [nomorHp, setNomorHp] = useState("");
+    const [status, setStatus] = useState("aktif");
     const [classes, setClasses] = useState<any[]>([]);
     const [academicYears, setAcademicYears] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -80,6 +81,7 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
                     tahun_ajaran_id: roleId === "2" ? academicYearId : null,
                     nisn: roleId === "2" ? nisn : null,
                     nomor_hp: roleId === "2" ? nomorHp : null,
+                    status,
                 }),
             });
 
@@ -94,6 +96,7 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
                 setAcademicYearId("");
                 setNisn("");
                 setNomorHp("");
+                setStatus("aktif");
                 onSuccess();
                 onClose();
             } else {
@@ -155,6 +158,19 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
                                     onChange={(e) => setPassword(e.target.value)}
                                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                                 />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Status</label>
+                                <select
+                                    value={status}
+                                    onChange={(e) => setStatus(e.target.value)}
+                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                                >
+                                    <option value="aktif">Aktif</option>
+                                    <option value="tidak_aktif">Tidak Aktif</option>
+                                    <option value="lulus">Lulus</option>
+                                </select>
                             </div>
 
                             <div>

@@ -25,6 +25,20 @@ interface TahunAjaran {
     is_active: boolean;
 }
 
+type UserStatus = 'aktif' | 'tidak_aktif' | 'lulus';
+
+const STATUS_LABELS: Record<UserStatus, string> = {
+    aktif: 'Aktif',
+    tidak_aktif: 'Tidak Aktif',
+    lulus: 'Lulus',
+};
+
+const STATUS_CLASSES: Record<UserStatus, string> = {
+    aktif: 'bg-green-100 text-green-800',
+    tidak_aktif: 'bg-red-100 text-red-800',
+    lulus: 'bg-blue-100 text-blue-800',
+};
+
 interface UserData {
     id: number;
     name: string;
@@ -35,6 +49,7 @@ interface UserData {
     tahun_ajaran?: TahunAjaran;
     nisn?: string;
     nomor_hp?: string;
+    status: UserStatus;
     created_at: string;
 }
 
@@ -52,6 +67,7 @@ export default function UserList() {
     const [filterRole, setFilterRole] = useState("");
     const [filterClass, setFilterClass] = useState("");
     const [filterAcademicYear, setFilterAcademicYear] = useState("");
+    const [filterStatus, setFilterStatus] = useState("");
     const [sortBy, setSortBy] = useState<'name' | 'email' | 'role' | 'class' | 'academic_year'>('name');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
     const [isBulkPromotionModalOpen, setIsBulkPromotionModalOpen] = useState(false);
@@ -133,7 +149,10 @@ export default function UserList() {
             // Filter by academic year
             const matchesAcademicYear = !filterAcademicYear || user.tahun_ajaran?.id.toString() === filterAcademicYear;
 
-            return matchesSearch && matchesRole && matchesClass && matchesAcademicYear;
+            // Filter by status
+            const matchesStatus = !filterStatus || user.status === filterStatus;
+
+            return matchesSearch && matchesRole && matchesClass && matchesAcademicYear && matchesStatus;
         });
 
         // Sort
@@ -169,7 +188,7 @@ export default function UserList() {
                 return aValue < bValue ? 1 : -1;
             }
         });
-    }, [users, searchQuery, filterRole, filterClass, filterAcademicYear, sortBy, sortDirection]);
+    }, [users, searchQuery, filterRole, filterClass, filterAcademicYear, filterStatus, sortBy, sortDirection]);
 
     const handleDelete = async (id: number) => {
         if (!confirm("Apakah Anda yakin ingin menghapus user ini?")) return;
@@ -324,13 +343,25 @@ export default function UserList() {
                     ))}
                 </select>
 
-                {(searchQuery || filterRole || filterClass || filterAcademicYear) && (
+                <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    className="px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                    <option value="">Semua Status</option>
+                    <option value="aktif">Aktif</option>
+                    <option value="tidak_aktif">Tidak Aktif</option>
+                    <option value="lulus">Lulus</option>
+                </select>
+
+                {(searchQuery || filterRole || filterClass || filterAcademicYear || filterStatus) && (
                     <button
                         onClick={() => {
                             setSearchQuery("");
                             setFilterRole("");
                             setFilterClass("");
                             setFilterAcademicYear("");
+                            setFilterStatus("");
                         }}
                         className="px-3 py-2 text-sm text-slate-600 hover:text-slate-900 underline"
                     >
@@ -403,6 +434,9 @@ export default function UserList() {
                                             </div>
                                         </th>
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                                            Status
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                                             Tanggal Gabung
                                         </th>
                                         <th scope="col" className="relative px-6 py-3">
@@ -444,6 +478,11 @@ export default function UserList() {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                                                 {user.tahun_ajaran?.tahun || '-'}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${STATUS_CLASSES[user.status] || 'bg-slate-100 text-slate-800'}`}>
+                                                    {STATUS_LABELS[user.status] || user.status}
+                                                </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                                                 {new Date(user.created_at).toLocaleDateString("id-ID")}

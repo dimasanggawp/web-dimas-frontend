@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { X, Loader2, Download, FileText, ExternalLink, User } from "lucide-react";
+import { X, Loader2, Download, FileText, ExternalLink, User, Trash2 } from "lucide-react";
 import { fetchWithAuth } from "@/utils/apiWrapper";
 
 interface Submission {
@@ -26,6 +26,7 @@ export default function SubmissionListModal({ isOpen, onClose, materi }: Submiss
     const [submissions, setSubmissions] = useState<Submission[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
+    const [deletingId, setDeletingId] = useState<number | null>(null);
 
     useEffect(() => {
         if (isOpen && materi) {
@@ -51,19 +52,69 @@ export default function SubmissionListModal({ isOpen, onClose, materi }: Submiss
         }
     };
 
+    const fetchSubmissionsQuietly = async () => {
+        try {
+            const res = await fetchWithAuth(`/api/materi/${materi.id}/submissions`);
+            if (res.ok) {
+                const data = await res.json();
+                setSubmissions(data);
+            }
+        } catch (err) {
+            console.error("Error polling submissions quietly:", err);
+        }
+    };
+
+    // Polling effect for AI Grading
+    useEffect(() => {
+        let intervalId: NodeJS.Timeout;
+
+        // Check if there are any submissions currently being graded
+        const hasUngradedSubmissions = submissions.some(sub => sub.grade === null && !sub.feedback);
+
+        if (isOpen && materi && hasUngradedSubmissions) {
+            intervalId = setInterval(() => {
+                fetchSubmissionsQuietly();
+            }, 3000); // Check every 3 seconds
+        }
+
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+        };
+    }, [isOpen, materi, submissions]);
+
+    const handleDelete = async (id: number) => {
+        if (!window.confirm("Apakah Anda yakin ingin menghapus laporan ini? Status siswa akan dikembalikan menjadi 'Belum Mengerjakan'.")) {
+            return;
+        }
+
+        setDeletingId(id);
+        try {
+            const res = await fetchWithAuth(`/api/submissions/${id}`, {
+                method: 'DELETE',
+            });
+
+            if (res.ok) {
+                // Remove from local state to update UI instantly
+                setSubmissions(prev => prev.filter(s => s.id !== id));
+            } else {
+                alert("Gagal menghapus laporan.");
+            }
+        } catch (err) {
+            alert("Terjadi kesalahan koneksi.");
+        } finally {
+            setDeletingId(null);
+        }
+    };
+
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-                    <div className="absolute inset-0 bg-gray-500 opacity-75" onClick={onClose}></div>
-                </div>
+        <div className="fixed inset-0 z-50 overflow-y-auto w-full">
+            <div className="flex min-h-screen items-center justify-center p-4">
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
 
-                <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-                <div className="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl w-full relative z-10">
-                    <div className="bg-white px-4 pt-5 pb-4 sm:p-6">
+                <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-[90vw] text-left overflow-hidden transform transition-all flex flex-col max-h-[90vh]">
+                    <div className="flex-shrink-0 bg-white px-4 pt-5 pb-4 sm:p-6">
                         <div className="flex justify-between items-center mb-6">
                             <div>
                                 <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
@@ -96,8 +147,10 @@ export default function SubmissionListModal({ isOpen, onClose, materi }: Submiss
                                         <tr>
                                             <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Siswa</th>
                                             <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">NISN</th>
-                                            <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Status</th>
+                                            <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Waktu Kumpul</th>
                                             <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">File</th>
+                                            <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Nilai AI</th>
+                                            <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Feedback AI</th>
                                             <th className="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase">Aksi</th>
                                         </tr>
                                     </thead>
@@ -130,22 +183,57 @@ export default function SubmissionListModal({ isOpen, onClose, materi }: Submiss
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
-                                                        <span className="text-xs text-slate-500 flex items-center gap-1.5 truncate max-w-[150px]">
+                                                        <a href={`/storage/${sub.file_path}`} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1.5 truncate max-w-[120px]" title={sub.file_path.split('/').pop()}>
                                                             <FileText className="h-3.5 w-3.5" />
                                                             {sub.file_path.split('/').pop()}
-                                                        </span>
+                                                        </a>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        {sub.grade !== null ? (
+                                                            <span className="text-sm font-bold text-green-700">{sub.grade} / 100</span>
+                                                        ) : (
+                                                            <div className="flex flex-col gap-1.5 w-full min-w-[100px]">
+                                                                <div className="flex items-center text-xs font-bold text-blue-700">
+                                                                    <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
+                                                                    Sedang diproses...
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-normal min-w-[300px]">
+                                                        {sub.grade !== null ? (
+                                                            <div className="text-sm text-slate-800 leading-relaxed max-w-[500px]">
+                                                                {sub.feedback || '-'}
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-sm text-slate-400 italic">Menunggu penilaian AI...</span>
+                                                        )}
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                                                        <a
-                                                            href={`/storage/${sub.file_path}`}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-all"
-                                                        >
-                                                            <Download className="h-3.5 w-3.5" />
-                                                            Buka File
-                                                            <ExternalLink className="h-3 w-3" />
-                                                        </a>
+                                                        <div className="flex justify-end items-center gap-2">
+                                                            <button
+                                                                onClick={() => handleDelete(sub.id)}
+                                                                disabled={deletingId === sub.id}
+                                                                className="inline-flex items-center gap-1.5 text-xs font-bold text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-all disabled:opacity-50"
+                                                                title="Hapus Laporan"
+                                                            >
+                                                                {deletingId === sub.id ? (
+                                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                                ) : (
+                                                                    <Trash2 className="h-4 w-4" />
+                                                                )}
+                                                            </button>
+                                                            <a
+                                                                href={`/storage/${sub.file_path}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-all"
+                                                            >
+                                                                <Download className="h-3.5 w-3.5" />
+                                                                Buka File
+                                                                <ExternalLink className="h-3 w-3" />
+                                                            </a>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             );

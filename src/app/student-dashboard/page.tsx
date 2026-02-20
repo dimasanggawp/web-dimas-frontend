@@ -40,6 +40,7 @@ export default function StudentDashboard() {
             const res = await fetchWithAuth("/api/materi/pending-tasks");
             if (res.ok) {
                 const data = await res.json();
+                console.log("PENDING TASKS API RESPONSE:", data);
                 setPendingTasks(data);
             }
         } catch (err) {

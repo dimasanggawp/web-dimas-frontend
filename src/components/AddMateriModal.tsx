@@ -12,6 +12,7 @@ interface AddMateriModalProps {
 export default function AddMateriModal({ isOpen, onClose, onSuccess }: AddMateriModalProps) {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
+    const [rubrik, setRubrik] = useState("");
     const [image, setImage] = useState<File | null>(null);
     const [deadline, setDeadline] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -39,6 +40,7 @@ export default function AddMateriModal({ isOpen, onClose, onSuccess }: AddMateri
             const formData = new FormData();
             formData.append('title', title);
             formData.append('content', content);
+            formData.append('rubrik_penilaian', rubrik);
             if (deadline) {
                 formData.append('deadline', deadline);
             }
@@ -60,6 +62,7 @@ export default function AddMateriModal({ isOpen, onClose, onSuccess }: AddMateri
             if (res.ok) {
                 setTitle("");
                 setContent("");
+                setRubrik("");
                 setImage(null);
                 setDeadline("");
                 setSelectedClasses([]);
@@ -111,6 +114,15 @@ export default function AddMateriModal({ isOpen, onClose, onSuccess }: AddMateri
                                     value={content}
                                     onChange={setContent}
                                     placeholder="Tulis konten materi di sini..."
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Rubrik Penilaian (Opsional)</label>
+                                <RichTextEditor
+                                    value={rubrik}
+                                    onChange={setRubrik}
+                                    placeholder="Tulis rubrik penilaian di sini..."
                                 />
                             </div>
 

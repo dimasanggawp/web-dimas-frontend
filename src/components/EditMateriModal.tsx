@@ -13,6 +13,7 @@ interface EditMateriModalProps {
 export default function EditMateriModal({ isOpen, onClose, onSuccess, materi }: EditMateriModalProps) {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
+    const [rubrik, setRubrik] = useState("");
     const [image, setImage] = useState<File | null>(null);
     const [existingImage, setExistingImage] = useState<string | null>(null);
     const [deadline, setDeadline] = useState("");
@@ -47,6 +48,7 @@ export default function EditMateriModal({ isOpen, onClose, onSuccess, materi }: 
                     // Update other fields to be sure
                     setTitle(data.title);
                     setExistingImage(data.image);
+                    setRubrik(data.rubrik_penilaian || "");
 
                     // Format deadline for datetime-local input (YYYY-MM-DDTHH:mm)
                     if (data.deadline) {
@@ -88,6 +90,7 @@ export default function EditMateriModal({ isOpen, onClose, onSuccess, materi }: 
             const formData = new FormData();
             formData.append('title', title);
             formData.append('content', content);
+            formData.append('rubrik_penilaian', rubrik);
             formData.append('deadline', deadline || '');
 
             selectedClasses.forEach(id => {
@@ -156,6 +159,15 @@ export default function EditMateriModal({ isOpen, onClose, onSuccess, materi }: 
                                     value={content}
                                     onChange={setContent}
                                     placeholder="Edit konten materi..."
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Rubrik Penilaian (Opsional)</label>
+                                <RichTextEditor
+                                    value={rubrik}
+                                    onChange={setRubrik}
+                                    placeholder="Edit rubrik penilaian..."
                                 />
                             </div>
 

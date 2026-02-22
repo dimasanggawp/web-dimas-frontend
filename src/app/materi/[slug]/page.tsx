@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { ArrowLeft, Calendar, User as UserIcon, FileText, Upload, CheckCircle, AlertCircle, Clock, Loader2 } from "lucide-react";
+import FormattedFeedback from "@/components/FormattedFeedback";
 import Link from "next/link";
 import { fetchWithAuth } from "@/utils/apiWrapper";
 import { getAuth } from "@/utils/auth";
@@ -300,7 +301,7 @@ export default function DetailMateri() {
                                                             {submission.feedback && (
                                                                 <div className="mt-2 text-sm text-green-800 bg-white/50 p-3 rounded-lg border border-green-100">
                                                                     <span className="font-semibold block mb-1">Feedback AI:</span>
-                                                                    {submission.feedback}
+                                                                    <FormattedFeedback feedback={submission.feedback} />
                                                                 </div>
                                                             )}
                                                         </div>

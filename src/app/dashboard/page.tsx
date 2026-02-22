@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
-import { LucideLayoutDashboard, LogOut, Plus, Users, BookOpen, Calendar, LayoutList } from "lucide-react";
+import { LucideLayoutDashboard, LogOut, Plus, Users, BookOpen, Calendar, LayoutList, Settings } from "lucide-react";
 import UserList from "@/components/UserList";
 import MateriList from "@/components/MateriList";
 import TahunAjaranList from "@/components/TahunAjaranList";
 import ClassList from "@/components/ClassList";
+import SettingsPanel from "@/components/SettingsPanel";
 import { getAuth } from "@/utils/auth";
 import { fetchWithAuth } from "@/utils/apiWrapper";
 
@@ -15,7 +16,7 @@ export default function Dashboard() {
     const router = useRouter();
     const [user, setUser] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState("overview"); // 'overview' | 'users' | 'materi' | 'tahun-ajaran' | 'classes'
+    const [activeTab, setActiveTab] = useState("overview"); // 'overview' | 'users' | 'materi' | 'tahun-ajaran' | 'classes' | 'settings'
     const [stats, setStats] = useState({ total_materi: 0 });
 
     useEffect(() => {
@@ -71,6 +72,14 @@ export default function Dashboard() {
                         </p>
                     </div>
                     <div className="mt-4 flex flex-wrap gap-2 lg:ml-4 lg:mt-0">
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab("settings")}
+                            className={`inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${activeTab === 'settings' ? 'bg-primary text-white focus-visible:outline-primary' : 'bg-white text-slate-700 hover:bg-slate-50'}`}
+                        >
+                            <Settings className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
+                            Pengaturan
+                        </button>
                         <button
                             type="button"
                             onClick={() => setActiveTab("materi")}
@@ -179,6 +188,10 @@ export default function Dashboard() {
 
                 {activeTab === "classes" && (
                     <ClassList />
+                )}
+
+                {activeTab === "settings" && (
+                    <SettingsPanel />
                 )}
 
             </main>

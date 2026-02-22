@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { X, Loader2, Download, FileText, ExternalLink, User, Trash2 } from "lucide-react";
 import { fetchWithAuth } from "@/utils/apiWrapper";
+import FormattedFeedback from "./FormattedFeedback";
 
 interface Submission {
     id: number;
@@ -203,7 +204,7 @@ export default function SubmissionListModal({ isOpen, onClose, materi }: Submiss
                                                     <td className="px-6 py-4 whitespace-normal min-w-[300px]">
                                                         {sub.grade !== null ? (
                                                             <div className="text-sm text-slate-800 leading-relaxed max-w-[500px]">
-                                                                {sub.feedback || '-'}
+                                                                <FormattedFeedback feedback={sub.feedback} />
                                                             </div>
                                                         ) : (
                                                             <span className="text-sm text-slate-400 italic">Menunggu penilaian AI...</span>

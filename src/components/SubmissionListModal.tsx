@@ -114,9 +114,10 @@ export default function SubmissionListModal({ isOpen, onClose, materi }: Submiss
             <div className="flex min-h-screen items-center justify-center p-4">
                 <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
 
-                <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-[90vw] text-left overflow-hidden transform transition-all flex flex-col max-h-[90vh]">
-                    <div className="flex-shrink-0 bg-white px-4 pt-5 pb-4 sm:p-6">
-                        <div className="flex justify-between items-center mb-6">
+                <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-[95vw] sm:max-w-[90vw] text-left overflow-hidden transform transition-all flex flex-col h-[90vh]">
+                    {/* Header - Fixed Component */}
+                    <div className="flex-shrink-0 bg-white px-4 pt-5 pb-4 sm:px-6 border-b border-slate-100">
+                        <div className="flex justify-between items-center">
                             <div>
                                 <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
                                     <FileText className="h-6 w-6 text-primary" />
@@ -124,11 +125,14 @@ export default function SubmissionListModal({ isOpen, onClose, materi }: Submiss
                                 </h3>
                                 <p className="text-sm text-slate-500 mt-1">Materi: {materi?.title}</p>
                             </div>
-                            <button onClick={onClose} className="text-slate-400 hover:text-slate-500">
+                            <button onClick={onClose} className="text-slate-400 hover:text-slate-500 p-2 hover:bg-slate-100 rounded-full transition-colors">
                                 <X className="h-6 w-6" />
                             </button>
                         </div>
+                    </div>
 
+                    {/* Body - Scrollable Area */}
+                    <div className="flex-1 overflow-y-auto bg-white p-4 sm:p-6 custom-scrollbar">
                         {isLoading ? (
                             <div className="py-20 flex flex-col items-center justify-center text-slate-500">
                                 <Loader2 className="h-10 w-10 animate-spin mb-4 text-primary" />

@@ -114,7 +114,14 @@ export default function EditMateriModal({ isOpen, onClose, onSuccess, materi }: 
                 onSuccess();
                 onClose();
             } else {
-                setError(data.message || "Gagal mengupdate materi.");
+                let errMsg = data.message || "Gagal mengupdate materi.";
+                if (data.errors) {
+                    const validationErrors = Object.values(data.errors).flat().join(", ");
+                    errMsg = `Validasi: ${validationErrors}`;
+                } else if (data.error) {
+                    errMsg = `Error: ${data.error}`;
+                }
+                setError(errMsg);
             }
         } catch (err) {
             setError("Terjadi kesalahan koneksi.");

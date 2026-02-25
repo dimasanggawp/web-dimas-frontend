@@ -109,7 +109,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
     ];
 
     return (
-        <div className="bg-white">
+        <div className="bg-white [&_.ql-container]:min-h-[200px] [&_.ql-container]:rounded-b-md [&_.ql-toolbar]:rounded-t-md [&_.ql-editor]:min-h-[200px] [&_.ql-editor]:max-h-[400px]">
             <ReactQuill
                 ref={quillRef}
                 theme="snow"
@@ -118,7 +118,6 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
                 modules={modules}
                 formats={formats}
                 placeholder={placeholder}
-                className="h-64 mb-16" // mb-16 untuk memberi ruang toolbar bottom jika ada overflow
             />
         </div>
     );

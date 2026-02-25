@@ -69,7 +69,14 @@ export default function AddMateriModal({ isOpen, onClose, onSuccess }: AddMateri
                 onSuccess();
                 onClose();
             } else {
-                setError(data.message || "Gagal membuat materi.");
+                let errMsg = data.message || "Gagal membuat materi.";
+                if (data.errors) {
+                    const validationErrors = Object.values(data.errors).flat().join(", ");
+                    errMsg = `Validasi: ${validationErrors}`;
+                } else if (data.error) {
+                    errMsg = `Error: ${data.error}`;
+                }
+                setError(errMsg);
             }
         } catch (err) {
             setError("Terjadi kesalahan koneksi.");

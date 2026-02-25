@@ -11,6 +11,7 @@ import ClassList from "@/components/ClassList";
 import SettingsPanel from "@/components/SettingsPanel";
 import { getAuth } from "@/utils/auth";
 import { fetchWithAuth } from "@/utils/apiWrapper";
+import Sidebar from "@/components/Sidebar";
 
 export default function Dashboard() {
     const router = useRouter();
@@ -18,6 +19,8 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("overview"); // 'overview' | 'users' | 'materi' | 'tahun-ajaran' | 'classes' | 'settings'
     const [stats, setStats] = useState({ total_materi: 0 });
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+    const [isSidebarOpenMobile, setIsSidebarOpenMobile] = useState(false);
 
     useEffect(() => {
         const { token, user: userData } = getAuth();
@@ -58,143 +61,114 @@ export default function Dashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50">
+        <div className="min-h-screen bg-slate-50 flex flex-col">
             <Navbar />
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-10">
-                <div className="lg:flex lg:items-center lg:justify-between mb-8">
-                    <div className="min-w-0 flex-1">
-                        <h2 className="text-2xl font-bold leading-7 text-slate-900 sm:truncate sm:text-3xl sm:tracking-tight">
-                            Dashboard
-                        </h2>
-                        <p className="mt-1 text-sm text-slate-500">
-                            Selamat datang kembali, {user?.name}
-                        </p>
-                    </div>
-                    <div className="mt-4 flex flex-wrap gap-2 lg:ml-4 lg:mt-0">
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab("settings")}
-                            className={`inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${activeTab === 'settings' ? 'bg-primary text-white focus-visible:outline-primary' : 'bg-white text-slate-700 hover:bg-slate-50'}`}
-                        >
-                            <Settings className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
-                            Pengaturan
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab("materi")}
-                            className={`inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${activeTab === 'materi' ? 'bg-primary text-white focus-visible:outline-primary' : 'bg-white text-slate-700 hover:bg-slate-50'}`}
-                        >
-                            <BookOpen className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
-                            Manajemen Materi
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab("tahun-ajaran")}
-                            className={`inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${activeTab === 'tahun-ajaran' ? 'bg-primary text-white focus-visible:outline-primary' : 'bg-white text-slate-700 hover:bg-slate-50'}`}
-                        >
-                            <Calendar className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
-                            Tahun Ajaran
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab("classes")}
-                            className={`inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${activeTab === 'classes' ? 'bg-primary text-white focus-visible:outline-primary' : 'bg-white text-slate-700 hover:bg-slate-50'}`}
-                        >
-                            <LayoutList className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
-                            Manajemen Kelas
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab("users")}
-                            className={`inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${activeTab === 'users' ? 'bg-primary text-white focus-visible:outline-primary' : 'bg-white text-slate-700 hover:bg-slate-50'}`}
-                        >
-                            <Users className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
-                            Manajemen User
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab("overview")}
-                            className={`inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${activeTab === 'overview' ? 'bg-primary text-white focus-visible:outline-primary' : 'bg-white text-slate-700 hover:bg-slate-50'}`}
-                        >
-                            <LucideLayoutDashboard className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
-                            Overview
-                        </button>
-                    </div>
-                </div>
+            <div className="flex flex-1 pt-16">
+                <Sidebar
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                    isCollapsed={isSidebarCollapsed}
+                    setIsCollapsed={setIsSidebarCollapsed}
+                    isOpenMobile={isSidebarOpenMobile}
+                    setIsOpenMobile={setIsSidebarOpenMobile}
+                />
 
-                {activeTab === "overview" && (
-                    <>
-                        {/* Dashboard Stats or Content Placeholder */}
-                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                            {/* Card 1 */}
-                            <div className="bg-white overflow-hidden shadow rounded-lg">
-                                <div className="p-5">
-                                    <div className="flex items-center">
-                                        <div className="flex-shrink-0">
-                                            <LucideLayoutDashboard className="h-6 w-6 text-slate-400" aria-hidden="true" />
-                                        </div>
-                                        <div className="ml-5 w-0 flex-1">
-                                            <dl>
-                                                <dt className="text-sm font-medium text-slate-500 truncate">Total Materi</dt>
-                                                <dd>
-                                                    <div className="text-lg font-medium text-slate-900">{stats.total_materi}</div>
-                                                </dd>
-                                            </dl>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="bg-slate-50 px-5 py-3">
-                                    <div className="text-sm">
-                                        <button onClick={() => setActiveTab("materi")} className="font-medium text-primary hover:text-blue-900">
-                                            Lihat semua
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            {/* Add more cards as needed */}
+                <main className={`flex-1 transition-all duration-300 ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'} p-4 sm:p-6 lg:p-8`}>
+                    <div className="max-w-7xl mx-auto">
+                        {/* Mobile sidebar toggle button (visible only on mobile) */}
+                        <div className="lg:hidden mb-6 flex items-center gap-4">
+                            <button
+                                onClick={() => setIsSidebarOpenMobile(true)}
+                                className="p-2 -ml-2 rounded-md text-slate-500 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
+                            >
+                                <span className="sr-only">Open sidebar</span>
+                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+                            <h2 className="text-xl font-bold leading-7 text-slate-900 truncate">
+                                {activeTab === 'overview' && 'Dashboard Overview'}
+                                {activeTab === 'materi' && 'Manajemen Materi'}
+                                {activeTab === 'users' && 'Manajemen User'}
+                                {activeTab === 'classes' && 'Manajemen Kelas'}
+                                {activeTab === 'tahun-ajaran' && 'Tahun Ajaran'}
+                                {activeTab === 'settings' && 'Pengaturan'}
+                            </h2>
                         </div>
 
-                        <div className="mt-8">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-medium leading-6 text-slate-900">Aksi Cepat</h3>
-                            </div>
-
-                            <div className="bg-white shadow overflow-hidden sm:rounded-md p-6">
-                                <button
-                                    onClick={() => setActiveTab("materi")}
-                                    type="button"
-                                    className="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                                >
-                                    <Plus className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
-                                    Kelola Materi
-                                </button>
-                            </div>
+                        <div className="hidden lg:block mb-6">
+                            <h2 className="text-2xl font-bold leading-7 text-slate-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                                {activeTab === 'overview' && 'Dashboard Overview'}
+                                {activeTab === 'materi' && 'Manajemen Materi'}
+                                {activeTab === 'users' && 'Manajemen User'}
+                                {activeTab === 'classes' && 'Manajemen Kelas'}
+                                {activeTab === 'tahun-ajaran' && 'Tahun Ajaran'}
+                                {activeTab === 'settings' && 'Pengaturan'}
+                            </h2>
+                            <p className="mt-1 text-sm text-slate-500">
+                                Selamat datang kembali, {user?.name}
+                            </p>
                         </div>
-                    </>
-                )}
 
-                {activeTab === "users" && (
-                    <UserList />
-                )}
+                        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 min-h-[500px]">
+                            {activeTab === "overview" && (
+                                <>
+                                    {/* Dashboard Stats or Content Placeholder */}
+                                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                                        {/* Card 1 */}
+                                        <div className="bg-slate-50 rounded-xl border border-slate-100 p-5 hover:shadow-md transition-shadow">
+                                            <div className="flex items-center gap-4">
+                                                <div className="flex-shrink-0 bg-blue-100 p-3 rounded-lg">
+                                                    <BookOpen className="h-6 w-6 text-primary" aria-hidden="true" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-medium text-slate-500 truncate">Total Materi</p>
+                                                    <p className="text-2xl font-bold text-slate-900">{stats.total_materi}</p>
+                                                </div>
+                                            </div>
+                                            <div className="mt-4 pt-4 border-t border-slate-200">
+                                                <button onClick={() => setActiveTab("materi")} className="text-sm font-medium text-primary hover:underline">
+                                                    Lihat detail &rarr;
+                                                </button>
+                                            </div>
+                                        </div>
+                                        {/* Add more cards as needed */}
+                                    </div>
 
-                {activeTab === "materi" && (
-                    <MateriList />
-                )}
+                                    <div className="mt-8">
+                                        <h3 className="text-lg font-medium leading-6 text-slate-900 mb-4">Aksi Cepat</h3>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                            <button
+                                                onClick={() => setActiveTab("materi")}
+                                                type="button"
+                                                className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-600 hover:shadow transition-all"
+                                            >
+                                                <Plus className="h-5 w-5" aria-hidden="true" />
+                                                Buat Materi Baru
+                                            </button>
+                                            <button
+                                                onClick={() => setActiveTab("users")}
+                                                type="button"
+                                                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 hover:shadow transition-all"
+                                            >
+                                                <Users className="h-5 w-5 text-slate-400" aria-hidden="true" />
+                                                Tambah User
+                                            </button>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
 
-                {activeTab === "tahun-ajaran" && (
-                    <TahunAjaranList />
-                )}
-
-                {activeTab === "classes" && (
-                    <ClassList />
-                )}
-
-                {activeTab === "settings" && (
-                    <SettingsPanel />
-                )}
-
-            </main>
+                            {activeTab === "users" && <UserList />}
+                            {activeTab === "materi" && <MateriList />}
+                            {activeTab === "tahun-ajaran" && <TahunAjaranList />}
+                            {activeTab === "classes" && <ClassList />}
+                            {activeTab === "settings" && <SettingsPanel />}
+                        </div>
+                    </div>
+                </main>
+            </div>
         </div>
     );
 }

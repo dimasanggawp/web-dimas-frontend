@@ -49,48 +49,50 @@ export default function Navbar() {
                     </div>
 
                     {/* Desktop Menu */}
-                    <div className="hidden lg:flex space-x-8">
-                        <Link href="/" className={`flex items-center gap-1 transition-colors ${pathname === '/' ? 'text-primary font-medium' : 'text-slate-600 hover:text-primary'}`}>
-                            <Home className="w-4 h-4" />
-                            <span>Home</span>
-                        </Link>
-                        <Link href="/materi" className={`flex items-center gap-1 transition-colors ${pathname === '/materi' ? 'text-primary font-medium' : 'text-slate-600 hover:text-primary'}`}>
-                            <BookOpen className="w-4 h-4" />
-                            <span>Materi</span>
-                        </Link>
-                        <Link href="/profil" className={`flex items-center gap-1 transition-colors ${pathname === '/profil' ? 'text-primary font-medium' : 'text-slate-600 hover:text-primary'}`}>
-                            <User className="w-4 h-4" />
-                            <span>Profil</span>
-                        </Link>
-                        {isLoggedIn && getAuth().user?.role?.name === 'admin' && (
-                            <Link href="/dashboard" className={`flex items-center gap-1 transition-colors ${pathname === '/dashboard' ? 'text-primary font-medium' : 'text-slate-600 hover:text-primary'}`}>
-                                <BookOpen className="w-4 h-4" />
-                                <span>Dashboard</span>
-                            </Link>
-                        )}
-                        {isLoggedIn && getAuth().user?.role?.name !== 'admin' && (
-                            <Link href="/student-dashboard" className={`flex items-center gap-1 transition-colors ${pathname === '/student-dashboard' ? 'text-primary font-medium' : 'text-slate-600 hover:text-primary'}`}>
-                                <BookOpen className="w-4 h-4" />
-                                <span>Dashboard</span>
-                            </Link>
-                        )}
+                    <div className="hidden lg:flex space-x-1">
+                        {[
+                            { name: 'Home', href: '/', icon: Home, show: true },
+                            { name: 'Materi', href: '/materi', icon: BookOpen, show: true },
+                            { name: 'Profil', href: '/profil', icon: User, show: true },
+                            { name: 'Dashboard Admin', href: '/dashboard', icon: BookOpen, show: isLoggedIn && getAuth().user?.role?.name === 'admin' },
+                            { name: 'Dashboard Siswa', href: '/student-dashboard', icon: BookOpen, show: isLoggedIn && getAuth().user?.role?.name !== 'admin' },
+                        ].map((item) => {
+                            if (!item.show) return null;
+                            const isActive = pathname === item.href;
+                            const Icon = item.icon;
+                            return (
+                                <Link
+                                    key={item.name}
+                                    href={item.href}
+                                    className={`relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group
+                                        ${isActive ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary hover:bg-slate-50'}
+                                    `}
+                                >
+                                    <Icon className={`w-4 h-4 transition-colors ${isActive ? 'text-primary' : 'text-slate-400 group-hover:text-primary'}`} />
+                                    <span>{item.name}</span>
+                                    {isActive && (
+                                        <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary rounded-t-full"></span>
+                                    )}
+                                </Link>
+                            );
+                        })}
                     </div>
 
                     <div className="hidden lg:flex items-center space-x-3">
                         {/* Theme Toggle */}
-                        <ThemeToggleButton />
+                        <ThemeToggleButton className="ring-1 ring-slate-200 shadow-sm" />
 
                         {isLoggedIn ? (
                             <button onClick={() => {
                                 logout();
                                 window.location.href = '/login';
-                            }} className="text-slate-600 hover:text-red-600 transition-colors flex items-center gap-1">
+                            }} className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors shadow-sm flex items-center gap-2 border border-red-100">
                                 <LogOut className="w-4 h-4" />
                                 <span>Logout</span>
                             </button>
                         ) : (
-                            <Link href="/login" className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-blue-600 transition-colors shadow-sm">
-                                Login
+                            <Link href="/login" className="px-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-primary to-blue-600 rounded-lg hover:from-blue-600 hover:to-primary transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                                Masuk / Login
                             </Link>
                         )}
                     </div>

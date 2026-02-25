@@ -68,7 +68,7 @@ export default function UserList() {
     const [filterClass, setFilterClass] = useState("");
     const [filterAcademicYear, setFilterAcademicYear] = useState("");
     const [filterStatus, setFilterStatus] = useState("");
-    const [sortBy, setSortBy] = useState<'name' | 'email' | 'role' | 'class' | 'academic_year'>('name');
+    const [sortBy, setSortBy] = useState<'name' | 'email' | 'role' | 'class' | 'academic_year' | 'nisn'>('name');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
     const [isBulkPromotionModalOpen, setIsBulkPromotionModalOpen] = useState(false);
     const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
@@ -217,6 +217,34 @@ export default function UserList() {
         }
     };
 
+    const handleBulkDelete = async () => {
+        if (!selectedUserIds.length) return;
+        if (!confirm(`Apakah Anda yakin ingin menghapus ${selectedUserIds.length} user yang dipilih?`)) return;
+
+        try {
+            const { token } = getAuth();
+            const res = await fetch("/api/users/bulk", {
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ ids: selectedUserIds })
+            });
+
+            if (res.ok) {
+                fetchUsers();
+                setSelectedUserIds([]);
+            } else {
+                const errorData = await res.json();
+                alert(`Gagal menghapus user: ${errorData.message || 'Error tidak diketahui'}`);
+            }
+        } catch (error) {
+            console.error("Failed to bulk delete users", error);
+            alert("Terjadi kesalahan sistem saat menghubungi server.");
+        }
+    };
+
     const handleEdit = (user: UserData) => {
         setSelectedUser(user);
         setIsEditModalOpen(true);
@@ -269,13 +297,22 @@ export default function UserList() {
                 </div>
                 <div className="flex gap-2">
                     {selectedUserIds.length > 0 && (
-                        <button
-                            onClick={() => setIsBulkAssignModalOpen(true)}
-                            className="inline-flex items-center px-4 py-2 border border-primary text-sm font-medium rounded-md text-primary bg-blue-50 hover:bg-blue-100"
-                        >
-                            <Users className="mr-2 h-4 w-4" />
-                            Pindahkan {selectedUserIds.length} Siswa
-                        </button>
+                        <>
+                            <button
+                                onClick={handleBulkDelete}
+                                className="inline-flex items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-red-50 hover:bg-red-100"
+                            >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Hapus {selectedUserIds.length} Terpilih
+                            </button>
+                            <button
+                                onClick={() => setIsBulkAssignModalOpen(true)}
+                                className="inline-flex items-center px-4 py-2 border border-primary text-sm font-medium rounded-md text-primary bg-blue-50 hover:bg-blue-100"
+                            >
+                                <Users className="mr-2 h-4 w-4" />
+                                Pindahkan {selectedUserIds.length} Siswa
+                            </button>
+                        </>
                     )}
                     <button
                         onClick={() => setIsBulkPromotionModalOpen(true)}

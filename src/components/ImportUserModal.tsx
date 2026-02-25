@@ -38,24 +38,31 @@ export default function ImportUserModal({ isOpen, onClose, onSuccess }: ImportUs
             const { token } = getAuth();
             const res = await fetch("/api/users/import-template", {
                 headers: {
-                    "Authorization": `Bearer ${token}`
+                    "Authorization": `Bearer ${token}`,
+                    "Accept": "application/octet-stream"
                 }
             });
 
-            if (!res.ok) throw new Error("Gagal mendownload template");
+            if (!res.ok) {
+                const contentType = res.headers.get('content-type') || '';
+                const errMsg = contentType.includes('application/json')
+                    ? (await res.json()).message
+                    : 'Server error: ' + res.status;
+                throw new Error(errMsg);
+            }
 
             const blob = await res.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = "template_import_user_v2.xlsx"; // Default filename
+            a.download = "template_import_user_v2.xlsx";
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            setError("Gagal mendownload template.");
+            setError(err.message || "Gagal mendownload template.");
         }
     };
 
@@ -78,10 +85,16 @@ export default function ImportUserModal({ isOpen, onClose, onSuccess }: ImportUs
             const res = await fetch("/api/users/import", {
                 method: "POST",
                 headers: {
-                    "Authorization": `Bearer ${token}`
+                    "Authorization": `Bearer ${token}`,
+                    "Accept": "application/json"
                 },
                 body: formData
             });
+
+            const contentType = res.headers.get('content-type') || '';
+            if (!contentType.includes('application/json')) {
+                throw new Error(`Server mengembalikan respons tidak valid (HTTP ${res.status}). Pastikan Anda sudah login sebagai admin.`);
+            }
 
             const data = await res.json();
 
@@ -91,17 +104,15 @@ export default function ImportUserModal({ isOpen, onClose, onSuccess }: ImportUs
                 if (fileInputRef.current) {
                     fileInputRef.current.value = "";
                 }
-                // Don't close immediately so user can see the result
-                // onSuccess(); // Refresh parent list
             } else {
                 setError(data.message || "Gagal mengimport data.");
                 if (data.errors) {
-                    setResult({ imported: 0, skipped: 0, errors: data.errors });
+                    setResult({ imported: 0, skipped: 0, errors: Array.isArray(data.errors) ? data.errors : Object.values(data.errors).flat() as string[] });
                 }
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            setError("Terjadi kesalahan koneksi.");
+            setError(err.message || "Terjadi kesalahan koneksi.");
         } finally {
             setIsLoading(false);
         }

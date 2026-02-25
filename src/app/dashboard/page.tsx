@@ -9,6 +9,7 @@ import MateriList from "@/components/MateriList";
 import TahunAjaranList from "@/components/TahunAjaranList";
 import ClassList from "@/components/ClassList";
 import SettingsPanel from "@/components/SettingsPanel";
+import RekapNilaiList from "@/components/RekapNilaiList";
 import { getAuth } from "@/utils/auth";
 import { fetchWithAuth } from "@/utils/apiWrapper";
 import Sidebar from "@/components/Sidebar";
@@ -93,6 +94,7 @@ export default function Dashboard() {
                                 {activeTab === 'users' && 'Manajemen User'}
                                 {activeTab === 'classes' && 'Manajemen Kelas'}
                                 {activeTab === 'tahun-ajaran' && 'Tahun Ajaran'}
+                                {activeTab === 'rekap-nilai' && 'Rekap Nilai Siswa'}
                                 {activeTab === 'settings' && 'Pengaturan'}
                             </h2>
                         </div>
@@ -104,6 +106,7 @@ export default function Dashboard() {
                                 {activeTab === 'users' && 'Manajemen User'}
                                 {activeTab === 'classes' && 'Manajemen Kelas'}
                                 {activeTab === 'tahun-ajaran' && 'Tahun Ajaran'}
+                                {activeTab === 'rekap-nilai' && 'Rekap Nilai Siswa'}
                                 {activeTab === 'settings' && 'Pengaturan'}
                             </h2>
                             <p className="mt-1 text-sm text-slate-500">
@@ -164,6 +167,7 @@ export default function Dashboard() {
                             {activeTab === "materi" && <MateriList />}
                             {activeTab === "tahun-ajaran" && <TahunAjaranList />}
                             {activeTab === "classes" && <ClassList />}
+                            {activeTab === "rekap-nilai" && <RekapNilaiList />}
                             {activeTab === "settings" && <SettingsPanel />}
                         </div>
                     </div>

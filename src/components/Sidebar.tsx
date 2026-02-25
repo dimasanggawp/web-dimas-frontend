@@ -11,7 +11,8 @@ import {
     ChevronLeft,
     ChevronRight,
     Home,
-    LogOut
+    LogOut,
+    FileSpreadsheet
 } from "lucide-react";
 import { logout } from "@/utils/auth";
 
@@ -34,6 +35,7 @@ export default function Sidebar({ activeTab, setActiveTab, isOpenMobile, setIsOp
         { id: "users", label: "Manajemen User", icon: Users },
         { id: "classes", label: "Manajemen Kelas", icon: LayoutList },
         { id: "tahun-ajaran", label: "Tahun Ajaran", icon: Calendar },
+        { id: "rekap-nilai", label: "Rekap Nilai", icon: FileSpreadsheet },
         { id: "settings", label: "Pengaturan", icon: Settings },
     ];
 

@@ -17,6 +17,7 @@ interface Materi {
     image: string | null;
     created_at: string;
     deadline?: string | null;
+    passing_grade?: number | null;
     rubrik_penilaian?: string | null;
     user: {
         name: string;
@@ -243,17 +244,25 @@ export default function DetailMateri() {
                                     <FileText className="w-5 h-5 text-primary" />
                                     Pengumpulan Tugas
                                 </h3>
-                                {materi.deadline && (
-                                    <div className={`text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1.5 ${new Date() > new Date(materi.deadline)
-                                        ? 'bg-red-100 text-red-700'
-                                        : 'bg-orange-100 text-orange-700'
-                                        }`}>
-                                        <Clock className="w-3.5 h-3.5" />
-                                        Deadline: {new Date(materi.deadline).toLocaleString('id-ID', {
-                                            day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                                        })}
-                                    </div>
-                                )}
+                                <div className="flex items-center gap-3 flex-wrap justify-end">
+                                    {materi.passing_grade != null && (
+                                        <div className="text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1.5 bg-blue-100 text-blue-800">
+                                            <CheckCircle className="w-3.5 h-3.5" />
+                                            KKM: {materi.passing_grade}
+                                        </div>
+                                    )}
+                                    {materi.deadline && (
+                                        <div className={`text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1.5 ${new Date() > new Date(materi.deadline)
+                                            ? 'bg-red-100 text-red-700'
+                                            : 'bg-orange-100 text-orange-700'
+                                            }`}>
+                                            <Clock className="w-3.5 h-3.5" />
+                                            Deadline: {new Date(materi.deadline).toLocaleString('id-ID', {
+                                                day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="p-8">
@@ -266,125 +275,159 @@ export default function DetailMateri() {
                                     </div>
                                 ) : (
                                     <>
-                                        {submission ? (
-                                            <div className="bg-green-50 border border-green-100 rounded-xl p-6 flex items-start gap-4">
-                                                <div className="bg-green-100 p-2 rounded-full">
-                                                    <CheckCircle className="w-6 h-6 text-green-600" />
-                                                </div>
-                                                <div className="flex-1">
-                                                    <h4 className="font-bold text-green-900 mb-1">Tugas Sudah Dikumpulkan</h4>
-                                                    <p className="text-sm text-green-700 mb-4">
-                                                        Anda telah berhasil mengumpulkan tugas pada {new Date(submission.submitted_at).toLocaleString('id-ID')}.
-                                                    </p>
-                                                    <a
-                                                        href={`/storage/${submission.file_path}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="inline-flex items-center text-sm font-medium text-green-800 hover:underline gap-1.5"
-                                                    >
-                                                        <FileText className="w-4 h-4" />
-                                                        Lihat File Anda
-                                                    </a>
+                                        {(() => {
+                                            const submissionGrade = submission?.grade;
+                                            const passingGrade = materi.passing_grade;
+                                            const hasFailed = submission && submissionGrade !== undefined && submissionGrade !== null && passingGrade != null && submissionGrade < passingGrade;
+                                            const bgClass = hasFailed ? 'bg-yellow-50 border-yellow-200' : 'bg-green-50 border-green-100';
+                                            const iconBgClass = hasFailed ? 'bg-yellow-100' : 'bg-green-100';
+                                            const textTitleClass = hasFailed ? 'text-yellow-900' : 'text-green-900';
+                                            const textDescClass = hasFailed ? 'text-yellow-700' : 'text-green-700';
+                                            const textLinkClass = hasFailed ? 'text-yellow-800' : 'text-green-800';
+                                            const borderClass = hasFailed ? 'border-yellow-200' : 'border-green-200';
+                                            const feedbackClass = hasFailed ? 'text-yellow-800 border-yellow-200 bg-yellow-50/50' : 'text-green-800 border-green-100 bg-white/50';
 
-                                                    {submission.grade === null && !submission.feedback && (
-                                                        <div className="mt-4 pt-4 border-t border-green-200 flex items-center gap-2">
-                                                            <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
-                                                            <p className="text-sm font-medium text-blue-700">Sedang dinilai oleh AI... Mohon tunggu sebentar.</p>
+                                            return (
+                                                <>
+                                                    {submission && (
+                                                        <div className={`${bgClass} border rounded-xl p-6 flex items-start gap-4 mb-6`}>
+                                                            <div className={`${iconBgClass} p-2 rounded-full`}>
+                                                                {hasFailed ? (
+                                                                    <AlertCircle className="w-6 h-6 text-yellow-600" />
+                                                                ) : (
+                                                                    <CheckCircle className="w-6 h-6 text-green-600" />
+                                                                )}
+                                                            </div>
+                                                            <div className="flex-1">
+                                                                <h4 className={`font-bold ${textTitleClass} mb-1`}>
+                                                                    {hasFailed ? 'Pekerjaan Anda Perlu Perbaikan' : 'Tugas Sudah Dikumpulkan'}
+                                                                </h4>
+                                                                <p className={`text-sm ${textDescClass} mb-4`}>
+                                                                    {hasFailed ? (
+                                                                        `Nilai Anda belum mencapai Nilai Minimum / KKM (${passingGrade}). Silakan perbaiki sesuai feedback dan kumpulkan revisi.`
+                                                                    ) : (
+                                                                        `Anda telah berhasil mengumpulkan tugas pada ${new Date(submission.submitted_at).toLocaleString('id-ID')}.`
+                                                                    )}
+                                                                </p>
+                                                                <a
+                                                                    href={submission.file_path.startsWith('http') ? submission.file_path : `/storage/${submission.file_path}`}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className={`inline-flex items-center text-sm font-medium ${textLinkClass} hover:underline gap-1.5`}
+                                                                >
+                                                                    <FileText className="w-4 h-4" />
+                                                                    Lihat File Anda
+                                                                </a>
+
+                                                                {submissionGrade == null && !submission.feedback && (
+                                                                    <div className={`mt-4 pt-4 border-t ${borderClass} flex items-center gap-2`}>
+                                                                        <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+                                                                        <p className="text-sm font-medium text-blue-700">Sedang dinilai oleh AI... Mohon tunggu sebentar.</p>
+                                                                    </div>
+                                                                )}
+
+                                                                {(submissionGrade != null || submission.feedback) && (
+                                                                    <div className={`mt-4 pt-4 border-t ${borderClass}`}>
+                                                                        {submissionGrade != null && (
+                                                                            <div className="flex items-center justify-between mb-2">
+                                                                                <p className={`text-sm font-bold ${textTitleClass}`}>Nilai Akhir: {submissionGrade} / 100</p>
+                                                                                {passingGrade != null && (
+                                                                                    <p className="text-xs font-semibold px-2 py-1 rounded bg-slate-200 text-slate-700">KKM: {passingGrade}</p>
+                                                                                )}
+                                                                            </div>
+                                                                        )}
+                                                                        {submission.feedback && (
+                                                                            <div className={`mt-2 text-sm ${feedbackClass} p-3 rounded-lg border`}>
+                                                                                <span className="font-semibold block mb-1">Feedback AI:</span>
+                                                                                <FormattedFeedback feedback={submission.feedback} />
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     )}
 
-                                                    {(submission.grade !== null || submission.feedback) && (
-                                                        <div className="mt-4 pt-4 border-t border-green-200">
-                                                            {submission.grade !== null && (
-                                                                <p className="text-sm font-bold text-green-900">Nilai Akhir: {submission.grade} / 100</p>
-                                                            )}
-                                                            {submission.feedback && (
-                                                                <div className="mt-2 text-sm text-green-800 bg-white/50 p-3 rounded-lg border border-green-100">
-                                                                    <span className="font-semibold block mb-1">Feedback AI:</span>
-                                                                    <FormattedFeedback feedback={submission.feedback} />
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <>
-                                                {materi.deadline && new Date() > new Date(materi.deadline) ? (
-                                                    <div className="bg-red-50 border border-red-100 rounded-xl p-6 flex items-start gap-4">
-                                                        <div className="bg-red-100 p-2 rounded-full">
-                                                            <AlertCircle className="w-6 h-6 text-red-600" />
-                                                        </div>
-                                                        <div>
-                                                            <h4 className="font-bold text-red-900 mb-1">Waktu Sudah Habis</h4>
-                                                            <p className="text-sm text-red-700">
-                                                                Maaf, Anda tidak dapat mengumpulkan tugas karena batas waktu sudah lewat.
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <form onSubmit={handleFileUpload} className="space-y-4">
-                                                        <div>
-                                                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                                                Upload Laporan (PDF atau DOCX)
-                                                            </label>
-                                                            <div className="flex items-center justify-center w-full">
-                                                                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-300 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
-                                                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                                        <Upload className="w-8 h-8 text-slate-400 mb-2" />
-                                                                        <p className="text-sm text-slate-500">
-                                                                            {uploadFile ? (
-                                                                                <span className="font-semibold text-primary">{uploadFile.name}</span>
-                                                                            ) : (
-                                                                                "Klik untuk memilih file"
-                                                                            )}
-                                                                        </p>
-                                                                        <p className="text-xs text-slate-400 mt-1">
-                                                                            PDF atau DOCX (Max 10MB)
+                                                    {(!submission || hasFailed) && (
+                                                        <>
+                                                            {materi.deadline && new Date() > new Date(materi.deadline) ? (
+                                                                <div className="bg-red-50 border border-red-100 rounded-xl p-6 flex items-start gap-4 mt-6">
+                                                                    <div className="bg-red-100 p-2 rounded-full">
+                                                                        <AlertCircle className="w-6 h-6 text-red-600" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <h4 className="font-bold text-red-900 mb-1">Waktu Sudah Habis</h4>
+                                                                        <p className="text-sm text-red-700">
+                                                                            Maaf, Anda tidak dapat mengumpulkan {submission ? 'revisi ' : ''}tugas karena batas waktu sudah lewat.
                                                                         </p>
                                                                     </div>
-                                                                    <input
-                                                                        type="file"
-                                                                        className="hidden"
-                                                                        accept=".pdf,.doc,.docx"
-                                                                        onChange={(e) => {
-                                                                            if (e.target.files && e.target.files[0]) {
-                                                                                const file = e.target.files[0];
-                                                                                if (file.size > 10 * 1024 * 1024) {
-                                                                                    setUploadError("Ukuran file maksimal 10MB.");
-                                                                                    setUploadFile(null);
-                                                                                } else {
-                                                                                    setUploadError("");
-                                                                                    setUploadFile(file);
-                                                                                }
-                                                                            }
-                                                                        }}
-                                                                    />
-                                                                </label>
-                                                            </div>
-                                                        </div>
+                                                                </div>
+                                                            ) : (
+                                                                <form onSubmit={handleFileUpload} className="space-y-4">
+                                                                    <div>
+                                                                        <label className="block text-sm font-medium text-slate-700 mb-2">
+                                                                            {submission ? 'Upload File Revisi (PDF atau DOCX)' : 'Upload Laporan (PDF atau DOCX)'}
+                                                                        </label>
+                                                                        <div className="flex items-center justify-center w-full">
+                                                                            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-300 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
+                                                                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                                                    <Upload className="w-8 h-8 text-slate-400 mb-2" />
+                                                                                    <p className="text-sm text-slate-500">
+                                                                                        {uploadFile ? (
+                                                                                            <span className="font-semibold text-primary">{uploadFile.name}</span>
+                                                                                        ) : (
+                                                                                            "Klik untuk memilih file"
+                                                                                        )}
+                                                                                    </p>
+                                                                                    <p className="text-xs text-slate-400 mt-1">
+                                                                                        PDF atau DOCX (Max 10MB)
+                                                                                    </p>
+                                                                                </div>
+                                                                                <input
+                                                                                    type="file"
+                                                                                    className="hidden"
+                                                                                    accept=".pdf,.doc,.docx"
+                                                                                    onChange={(e) => {
+                                                                                        if (e.target.files && e.target.files[0]) {
+                                                                                            const file = e.target.files[0];
+                                                                                            if (file.size > 10 * 1024 * 1024) {
+                                                                                                setUploadError("Ukuran file maksimal 10MB.");
+                                                                                                setUploadFile(null);
+                                                                                            } else {
+                                                                                                setUploadError("");
+                                                                                                setUploadFile(file);
+                                                                                            }
+                                                                                        }
+                                                                                    }}
+                                                                                />
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
 
-                                                        {uploadError && (
-                                                            <div className="text-red-600 text-sm flex items-center gap-1.5">
-                                                                <AlertCircle className="w-4 h-4" />
-                                                                {uploadError}
-                                                            </div>
-                                                        )}
+                                                                    {uploadError && (
+                                                                        <div className="text-red-600 text-sm flex items-center gap-1.5">
+                                                                            <AlertCircle className="w-4 h-4" />
+                                                                            {uploadError}
+                                                                        </div>
+                                                                    )}
 
-                                                        <div className="flex justify-end">
-                                                            <button
-                                                                type="submit"
-                                                                disabled={uploading || !uploadFile}
-                                                                className="inline-flex items-center px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed gap-2"
-                                                            >
-                                                                {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
-                                                                Kumpulkan Tugas
-                                                            </button>
-                                                        </div>
-                                                    </form>
-                                                )}
-                                            </>
-                                        )}
+                                                                    <div className="flex justify-end">
+                                                                        <button
+                                                                            type="submit"
+                                                                            disabled={uploading || !uploadFile}
+                                                                            className="inline-flex items-center px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed gap-2"
+                                                                        >
+                                                                            {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
+                                                                            {submission ? 'Perbaiki Tugas' : 'Kumpulkan Tugas'}
+                                                                        </button>
+                                                                    </div>
+                                                                </form>
+                                                            )}
+                                                        </>
+                                                    )}
+                                                </>
+                                            );
+                                        })()}
                                     </>
                                 )}
                             </div>

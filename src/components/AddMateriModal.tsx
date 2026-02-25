@@ -15,6 +15,7 @@ export default function AddMateriModal({ isOpen, onClose, onSuccess }: AddMateri
     const [rubrik, setRubrik] = useState("");
     const [image, setImage] = useState<File | null>(null);
     const [deadline, setDeadline] = useState("");
+    const [passingGrade, setPassingGrade] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const [classes, setClasses] = useState<any[]>([]);
@@ -44,6 +45,9 @@ export default function AddMateriModal({ isOpen, onClose, onSuccess }: AddMateri
             if (deadline) {
                 formData.append('deadline', deadline);
             }
+            if (passingGrade) {
+                formData.append('passing_grade', passingGrade);
+            }
             selectedClasses.forEach(id => {
                 formData.append('class_room_ids[]', id.toString());
             });
@@ -65,6 +69,7 @@ export default function AddMateriModal({ isOpen, onClose, onSuccess }: AddMateri
                 setRubrik("");
                 setImage(null);
                 setDeadline("");
+                setPassingGrade("");
                 setSelectedClasses([]);
                 onSuccess();
                 onClose();
@@ -86,24 +91,20 @@ export default function AddMateriModal({ isOpen, onClose, onSuccess }: AddMateri
     };
 
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-                    <div className="absolute inset-0 bg-gray-500 opacity-75" onClick={onClose}></div>
-                </div>
+        <div className="fixed inset-0 z-[100] overflow-y-auto w-full">
+            <div className="flex min-h-screen items-center justify-center p-4">
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
 
-                <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-[95vw] sm:max-w-4xl text-left overflow-hidden transform transition-all flex flex-col max-h-[90vh]">
+                    <div className="flex-shrink-0 bg-white px-4 pt-5 pb-4 sm:px-6 border-b border-slate-100 flex justify-between items-center">
+                        <h3 className="text-xl font-bold text-slate-900">Buat Materi Baru</h3>
+                        <button onClick={onClose} className="text-slate-400 hover:text-slate-500 p-2 hover:bg-slate-100 rounded-full transition-colors">
+                            <X className="h-6 w-6" />
+                        </button>
+                    </div>
 
-                <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full relative z-10">
-                    <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg leading-6 font-medium text-gray-900">Buat Materi Baru</h3>
-                            <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
-                                <X className="h-6 w-6" />
-                            </button>
-                        </div>
-
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar bg-white">
+                        <form id="add-materi-form" onSubmit={handleSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Judul Materi</label>
                                 <input
@@ -133,14 +134,30 @@ export default function AddMateriModal({ isOpen, onClose, onSuccess }: AddMateri
                                 />
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Deadline Pengumpulan (Opsional)</label>
-                                <input
-                                    type="datetime-local"
-                                    value={deadline}
-                                    onChange={(e) => setDeadline(e.target.value)}
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                                />
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Nilai Minimum / KKM (Opsional)</label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        value={passingGrade}
+                                        onChange={(e) => setPassingGrade(e.target.value)}
+                                        placeholder="Misal: 75"
+                                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                                    />
+                                    <p className="text-xs text-gray-500 mt-1">Batas nilai agar siswa dianggap lulus materi ini.</p>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Deadline Pengumpulan (Opsional)</label>
+                                    <input
+                                        type="datetime-local"
+                                        value={deadline}
+                                        onChange={(e) => setDeadline(e.target.value)}
+                                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                                    />
+                                </div>
                             </div>
 
                             <div>
@@ -193,24 +210,25 @@ export default function AddMateriModal({ isOpen, onClose, onSuccess }: AddMateri
                             {error && (
                                 <div className="text-red-600 text-sm">{error}</div>
                             )}
-
-                            <div className="mt-5 sm:mt-6 flex justify-end gap-2">
-                                <button
-                                    type="button"
-                                    onClick={onClose}
-                                    className="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:text-sm"
-                                >
-                                    Batal
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={isLoading}
-                                    className="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:text-sm disabled:opacity-50"
-                                >
-                                    {isLoading ? <Loader2 className="animate-spin h-5 w-5" /> : 'Simpan'}
-                                </button>
-                            </div>
                         </form>
+                    </div>
+
+                    <div className="flex-shrink-0 bg-slate-50 px-4 py-4 sm:px-6 border-t border-slate-100 flex justify-end gap-2">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:text-sm"
+                        >
+                            Batal
+                        </button>
+                        <button
+                            type="submit"
+                            form="add-materi-form"
+                            disabled={isLoading}
+                            className="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:text-sm disabled:opacity-50"
+                        >
+                            {isLoading ? <Loader2 className="animate-spin h-5 w-5" /> : 'Simpan'}
+                        </button>
                     </div>
                 </div>
             </div>

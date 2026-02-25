@@ -188,15 +188,22 @@ export default function StudentDashboard() {
                                                 <p className="text-sm font-bold text-slate-900 truncate">
                                                     {task.title}
                                                 </p>
-                                                <p className="mt-1 text-xs text-slate-500">
-                                                    {task.deadline ? (
-                                                        <>Deadline: {new Date(task.deadline).toLocaleString('id-ID', {
-                                                            day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                                                        })}</>
-                                                    ) : (
-                                                        <span className="text-slate-400 italic">Tidak ada tenggat waktu</span>
+                                                <div className="mt-1 flex items-center gap-3">
+                                                    {task.passing_grade != null && (
+                                                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-100">
+                                                            KKM: {task.passing_grade}
+                                                        </span>
                                                     )}
-                                                </p>
+                                                    <p className="text-xs text-slate-500">
+                                                        {task.deadline ? (
+                                                            <>Deadline: {new Date(task.deadline).toLocaleString('id-ID', {
+                                                                day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                                                            })}</>
+                                                        ) : (
+                                                            <span className="text-slate-400 italic">Tidak ada tenggat waktu</span>
+                                                        )}
+                                                    </p>
+                                                </div>
                                             </div>
                                             <div className="ml-4 flex-shrink-0">
                                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
@@ -239,6 +246,11 @@ export default function StudentDashboard() {
                                                         <Clock className="h-3 w-3" />
                                                         {new Date(m.created_at).toLocaleDateString('id-ID')}
                                                     </p>
+                                                    {m.passing_grade != null && (
+                                                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-100">
+                                                            KKM: {m.passing_grade}
+                                                        </span>
+                                                    )}
                                                     {m.deadline && (
                                                         <p className="text-xs text-red-500 flex items-center gap-1 font-medium">
                                                             <Calendar className="h-3 w-3" />
@@ -250,7 +262,11 @@ export default function StudentDashboard() {
                                                 </div>
                                             </div>
                                             <div className="ml-4 flex-shrink-0 flex items-center gap-3">
-                                                {m.is_submitted ? (
+                                                {m.needs_improvement ? (
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                        Perlu Perbaikan
+                                                    </span>
+                                                ) : m.is_submitted ? (
                                                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                                         Selesai
                                                     </span>

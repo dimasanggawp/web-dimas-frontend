@@ -115,29 +115,42 @@ export default function DetailMateri() {
     useEffect(() => {
         let intervalId: NodeJS.Timeout;
 
+        const checkSubmission = async () => {
+            if (!materi) return;
+            try {
+                const res = await fetchWithAuth(`/api/materi/${materi.id}/my-submission`);
+                if (res.ok) {
+                    const data = await res.json();
+                    // Update if grade or feedback is now available
+                    if (data && (data.grade !== null || data.feedback)) {
+                        setSubmission(data);
+                        clearInterval(intervalId);
+                    }
+                }
+            } catch (err) {
+                console.error("Error polling submission status:", err);
+            }
+        };
+
         // Start polling only if user has a submission but it's not graded yet
         if (submission && submission.grade === null && !submission.feedback && materi) {
-            intervalId = setInterval(async () => {
-                try {
-                    const res = await fetchWithAuth(`/api/materi/${materi.id}/my-submission`);
-                    if (res.ok) {
-                        const data = await res.json();
-                        // If grade or feedback exists, update state and stop polling
-                        if (data && (data.grade !== null || data.feedback)) {
-                            setSubmission(data);
-                            clearInterval(intervalId);
-                        }
-                    }
-                } catch (err) {
-                    console.error("Error polling submission status:", err);
-                }
-            }, 3000); // Check every 3 seconds
+            intervalId = setInterval(checkSubmission, 2000); // Check every 2 seconds
         }
+
+        // Also re-fetch on window focus (if student tabs away and comes back)
+        const handleFocus = () => {
+            if (submission && submission.grade === null && !submission.feedback && materi) {
+                checkSubmission();
+            }
+        };
+        window.addEventListener('focus', handleFocus);
 
         return () => {
             if (intervalId) clearInterval(intervalId);
+            window.removeEventListener('focus', handleFocus);
         };
     }, [submission?.grade, submission?.feedback, materi?.id]);
+
 
     if (loading) {
         return (
@@ -310,7 +323,7 @@ export default function DetailMateri() {
                                                                     )}
                                                                 </p>
                                                                 <a
-                                                                    href={submission.file_path.startsWith('http') ? submission.file_path : `/storage/${submission.file_path}`}
+                                                                    href={submission.file_path ? (submission.file_path.startsWith('http') ? submission.file_path : `/storage/${submission.file_path}`) : '#'}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
                                                                     className={`inline-flex items-center text-sm font-medium ${textLinkClass} hover:underline gap-1.5`}

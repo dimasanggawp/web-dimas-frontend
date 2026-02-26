@@ -58,7 +58,7 @@ export default function DetailMateri() {
             const { user: userData } = getAuth();
             setUser(userData);
 
-            fetchWithAuth(`/api/materi/${params.slug}`)
+            fetchWithAuth(`/api/materi/${params.slug}?t=${Date.now()}`)
                 .then(res => {
                     if (!res.ok) throw new Error("Not found");
                     return res.json();
@@ -118,7 +118,7 @@ export default function DetailMateri() {
         const checkSubmission = async () => {
             if (!materi) return;
             try {
-                const res = await fetchWithAuth(`/api/materi/${materi.id}/my-submission`);
+                const res = await fetchWithAuth(`/api/materi/${materi.id}/my-submission?t=${Date.now()}`);
                 if (res.ok) {
                     const data = await res.json();
                     // Update if grade or feedback is now available

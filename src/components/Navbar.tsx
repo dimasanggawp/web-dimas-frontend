@@ -53,7 +53,7 @@ export default function Navbar() {
                         {[
                             { name: 'Home', href: '/', icon: Home, show: true },
                             { name: 'Materi', href: '/materi', icon: BookOpen, show: true },
-                            { name: 'Profil', href: '/profil', icon: User, show: true },
+                            { name: 'Profil', href: '/', icon: User, show: true },
                             { name: 'Dashboard Admin', href: '/dashboard', icon: BookOpen, show: isLoggedIn && getAuth().user?.role?.name === 'admin' },
                             { name: 'Dashboard Siswa', href: '/student-dashboard', icon: BookOpen, show: isLoggedIn && getAuth().user?.role?.name !== 'admin' },
                         ].map((item) => {

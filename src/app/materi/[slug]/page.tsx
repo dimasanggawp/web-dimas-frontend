@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { ArrowLeft, Calendar, User as UserIcon, FileText, Upload, CheckCircle, AlertCircle, Clock, Loader2 } from "lucide-react";
@@ -22,6 +22,7 @@ interface Materi {
     user: {
         name: string;
     };
+    my_submission?: Submission | null;
 }
 
 interface Submission {
@@ -38,44 +39,41 @@ export default function DetailMateri() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [user, setUser] = useState<any>(null);
-    const [submission, setSubmission] = useState<Submission | null>(null);
     const [uploading, setUploading] = useState(false);
     const [uploadError, setUploadError] = useState("");
-    const [uploadSuccess, setUploadSuccess] = useState(false);
     const [uploadFile, setUploadFile] = useState<File | null>(null);
+    // justUploadedSubmission is a SEPARATE state from materi.my_submission.
+    // It is set immediately after a successful upload to force UI transition,
+    // bypassing any async materi state update race conditions.
+    const [justUploadedSubmission, setJustUploadedSubmission] = useState<Submission | null>(null);
+    const recentUploadRef = useRef(false);
+
+    const loadData = async (showLoading = false) => {
+        if (!params?.slug) return;
+        if (showLoading) setLoading(true);
+
+        try {
+            const res = await fetchWithAuth(`/api/materi/${params.slug}?t=${Date.now()}`);
+            if (!res.ok) throw new Error("Not found");
+            const data = await res.json();
+            setMateri(data);
+
+            // If server now has the submission, sync justUploadedSubmission too
+            if (data.my_submission) {
+                setJustUploadedSubmission(data.my_submission);
+            }
+        } catch (err) {
+            console.error(err);
+            setError(true);
+        } finally {
+            if (showLoading) setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        if (params?.slug) {
-            // Reset states for the new materi
-            setLoading(true);
-            setMateri(null);
-            setSubmission(null);
-            setUploadError("");
-            setUploadSuccess(false);
-            setUploadFile(null);
-            setError(false);
-
-            const { user: userData } = getAuth();
-            setUser(userData);
-
-            fetchWithAuth(`/api/materi/${params.slug}?t=${Date.now()}`)
-                .then(res => {
-                    if (!res.ok) throw new Error("Not found");
-                    return res.json();
-                })
-                .then(data => {
-                    setMateri(data);
-                    if (data.my_submission) {
-                        setSubmission(data.my_submission);
-                    }
-                    setLoading(false);
-                })
-                .catch(err => {
-                    console.error(err);
-                    setError(true);
-                    setLoading(false);
-                });
-        }
+        const { user: userData } = getAuth();
+        setUser(userData);
+        loadData(true);
     }, [params?.slug]);
 
     const handleFileUpload = async (e: React.FormEvent) => {
@@ -84,7 +82,6 @@ export default function DetailMateri() {
 
         setUploading(true);
         setUploadError("");
-        setUploadSuccess(false);
 
         try {
             const formData = new FormData();
@@ -95,25 +92,56 @@ export default function DetailMateri() {
                 body: formData,
             });
 
-            const data = await res.json();
+            // Check HTTP status FIRST before attempting JSON parse
+            const isSuccess = res.ok; // 2xx status
 
-            if (res.ok) {
-                setUploadSuccess(true);
-                setSubmission(data.data);
+            // Parse JSON safely — a parse failure must NOT block the UI transition
+            let data: any = null;
+            try {
+                data = await res.json();
+            } catch (_jsonErr) {
+                console.warn("Upload: failed to parse JSON response", _jsonErr);
+            }
+
+            if (isSuccess) {
+                // Build submission object from API response or create placeholder
+                const serverSubmission = data?.data;
+                const newSubmission: Submission = serverSubmission && serverSubmission.id ? serverSubmission : {
+                    id: Date.now(),
+                    file_path: '',
+                    submitted_at: new Date().toISOString(),
+                    grade: null,
+                    feedback: null,
+                };
+
+                // Set state immediately for instant UI feedback
+                setJustUploadedSubmission(newSubmission);
                 setUploadFile(null);
+                setUploading(false);
+
+                // Hard reload after short delay — guarantees UI always shows correct state
+                // regardless of React state batching or rendering issues
+                setTimeout(() => {
+                    window.location.reload();
+                }, 800);
             } else {
-                setUploadError(data.message || "Gagal mengunggah tugas.");
+                const errMsg = data?.message || "Gagal mengunggah tugas.";
+                setUploadError(errMsg);
             }
         } catch (err) {
+            console.error("Upload error:", err);
             setUploadError("Terjadi kesalahan koneksi.");
         } finally {
             setUploading(false);
         }
     };
 
-    // Polling effect for AI Grading
+    // Polling effect for AI Grading status
     useEffect(() => {
         let intervalId: NodeJS.Timeout;
+
+        // Effective submission: prefer justUploadedSubmission (immediate), fall back to materi data
+        const effectiveSubmission = justUploadedSubmission || materi?.my_submission;
 
         const checkSubmission = async () => {
             if (!materi) return;
@@ -121,10 +149,9 @@ export default function DetailMateri() {
                 const res = await fetchWithAuth(`/api/materi/${materi.id}/my-submission?t=${Date.now()}`);
                 if (res.ok) {
                     const data = await res.json();
-                    // Update if grade or feedback is now available
-                    if (data && (data.grade !== null || data.feedback)) {
-                        setSubmission(data);
-                        clearInterval(intervalId);
+                    if (data) {
+                        setJustUploadedSubmission(data);
+                        setMateri(prev => prev ? { ...prev, my_submission: data } : null);
                     }
                 }
             } catch (err) {
@@ -132,14 +159,13 @@ export default function DetailMateri() {
             }
         };
 
-        // Start polling only if user has a submission but it's not graded yet
-        if (submission && submission.grade === null && !submission.feedback && materi) {
-            intervalId = setInterval(checkSubmission, 2000); // Check every 2 seconds
+        // Poll while submission exists but grade/feedback not yet returned
+        if (effectiveSubmission && effectiveSubmission.grade === null && !effectiveSubmission.feedback && materi) {
+            intervalId = setInterval(checkSubmission, 3000);
         }
 
-        // Also re-fetch on window focus (if student tabs away and comes back)
         const handleFocus = () => {
-            if (submission && submission.grade === null && !submission.feedback && materi) {
+            if (effectiveSubmission && effectiveSubmission.grade === null && !effectiveSubmission.feedback && materi) {
                 checkSubmission();
             }
         };
@@ -149,8 +175,7 @@ export default function DetailMateri() {
             if (intervalId) clearInterval(intervalId);
             window.removeEventListener('focus', handleFocus);
         };
-    }, [submission?.grade, submission?.feedback, materi?.id]);
-
+    }, [justUploadedSubmission?.grade, justUploadedSubmission?.feedback, materi?.my_submission?.grade, materi?.my_submission?.feedback, materi?.id]);
 
     if (loading) {
         return (
@@ -249,9 +274,8 @@ export default function DetailMateri() {
                     </article>
 
                     {/* Assignment Submission Section */}
-                    {/* Show for logged in non-admin users, OR show login prompt for guests */}
                     {(!user || user?.role?.name !== 'admin') && (
-                        <div className="mt-8 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                        <div key={materi?.my_submission?.id || 'submission-section'} className="mt-8 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                             <div className="bg-slate-50 px-8 py-4 border-b border-slate-100 flex items-center justify-between">
                                 <h3 className="font-bold text-slate-900 flex items-center gap-2">
                                     <FileText className="w-5 h-5 text-primary" />
@@ -289,6 +313,7 @@ export default function DetailMateri() {
                                 ) : (
                                     <>
                                         {(() => {
+                                            const submission = justUploadedSubmission || materi.my_submission;
                                             const submissionGrade = submission?.grade;
                                             const passingGrade = materi.passing_grade;
                                             const hasFailed = submission && submissionGrade !== undefined && submissionGrade !== null && passingGrade != null && submissionGrade < passingGrade;
@@ -303,7 +328,7 @@ export default function DetailMateri() {
                                             return (
                                                 <>
                                                     {submission && (
-                                                        <div className={`${bgClass} border rounded-xl p-6 flex items-start gap-4 mb-6`}>
+                                                        <div key={`box-${submission.id}`} className={`${bgClass} border rounded-xl p-6 flex items-start gap-4 mb-6`}>
                                                             <div className={`${iconBgClass} p-2 rounded-full`}>
                                                                 {hasFailed ? (
                                                                     <AlertCircle className="w-6 h-6 text-yellow-600" />
@@ -362,7 +387,7 @@ export default function DetailMateri() {
                                                     )}
 
                                                     {(!submission || hasFailed) && (
-                                                        <>
+                                                        <div key="upload-form-container">
                                                             {materi.deadline && new Date() > new Date(materi.deadline) ? (
                                                                 <div className="bg-red-50 border border-red-100 rounded-xl p-6 flex items-start gap-4 mt-6">
                                                                     <div className="bg-red-100 p-2 rounded-full">
@@ -436,7 +461,7 @@ export default function DetailMateri() {
                                                                     </div>
                                                                 </form>
                                                             )}
-                                                        </>
+                                                        </div>
                                                     )}
                                                 </>
                                             );
